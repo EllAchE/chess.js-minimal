@@ -1937,63 +1937,6 @@ export class Chess {
     return moveHistory;
   }
 
-  private _pruneComments() {
-    const reversedHistory = [];
-    const currentComments: Record<string, string> = {};
-
-    const copyComment = (fen: string) => {
-      if (fen in this._comments) {
-        currentComments[fen] = this._comments[fen];
-      }
-    };
-
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove());
-    }
-
-    copyComment(this.fen());
-
-    while (true) {
-      const move = reversedHistory.pop();
-      if (!move) {
-        break;
-      }
-      this._makeMove(move);
-      copyComment(this.fen());
-    }
-    this._comments = currentComments;
-  }
-
-  getComment() {
-    return this._comments[this.fen()];
-  }
-
-  setComment(comment: string) {
-    this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']');
-  }
-
-  deleteComment() {
-    const comment = this._comments[this.fen()];
-    delete this._comments[this.fen()];
-    return comment;
-  }
-
-  getComments() {
-    this._pruneComments();
-    return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] };
-    });
-  }
-
-  deleteComments() {
-    this._pruneComments();
-    return Object.keys(this._comments).map((fen) => {
-      const comment = this._comments[fen];
-      delete this._comments[fen];
-      return { fen: fen, comment: comment };
-    });
-  }
-
   setCastlingRights(
     color: Color,
     rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>
@@ -2022,9 +1965,5 @@ export class Chess {
       [KING]: (this._castling[color] & SIDES[KING]) !== 0,
       [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
     };
-  }
-
-  moveNumber() {
-    return this._moveNumber;
   }
 }
