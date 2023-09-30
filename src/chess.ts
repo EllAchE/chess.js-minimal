@@ -25,6 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+// comment
 export const WHITE = 'w';
 export const BLACK = 'b';
 
