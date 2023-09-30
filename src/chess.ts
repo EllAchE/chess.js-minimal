@@ -26,6 +26,7 @@
  */
 
 import {
+  ATTACKS,
   BISHOP,
   BITS,
   BLACK,
@@ -34,9 +35,22 @@ import {
   FLAGS,
   KING,
   KNIGHT,
+  Ox88,
   PAWN,
+  PAWN_OFFSETS,
+  PIECE_MASKS,
+  PIECE_OFFSETS,
+  PROMOTIONS,
   QUEEN,
+  RANK_1,
+  RANK_8,
+  RAYS,
   ROOK,
+  ROOKS,
+  SECOND_RANK,
+  SIDES,
+  SYMBOLS,
+  TERMINATION_MARKERS,
   WHITE,
 } from './constants'
 import {
@@ -48,146 +62,6 @@ import {
   PieceSymbol,
   Square,
 } from './types'
-
-/*
- * NOTES ABOUT 0x88 MOVE GENERATION ALGORITHM
- * ----------------------------------------------------------------------------
- * From https://github.com/jhlywa/chess.js/issues/230
- *
- * A lot of people are confused when they first see the internal representation
- * of chess.js. It uses the 0x88 Move Generation Algorithm which internally
- * stores the board as an 8x16 array. This is purely for efficiency but has a
- * couple of interesting benefits:
- *
- * 1. 0x88 offers a very inexpensive "off the board" check. Bitwise AND (&) any
- *    square with 0x88, if the result is non-zero then the square is off the
- *    board. For example, assuming a knight square A8 (0 in 0x88 notation),
- *    there are 8 possible directions in which the knight can move. These
- *    directions are relative to the 8x16 board and are stored in the
- *    PIECE_OFFSETS map. One possible move is A8 - 18 (up one square, and two
- *    squares to the left - which is off the board). 0 - 18 = -18 & 0x88 = 0x88
- *    (because of two-complement representation of -18). The non-zero result
- *    means the square is off the board and the move is illegal. Take the
- *    opposite move (from A8 to C7), 0 + 18 = 18 & 0x88 = 0. A result of zero
- *    means the square is on the board.
- *
- * 2. The relative distance (or difference) between two squares on a 8x16 board
- *    is unique and can be used to inexpensively determine if a piece on a
- *    square can attack any other arbitrary square. For example, let's see if a
- *    pawn on E7 can attack E2. The difference between E7 (20) - E2 (100) is
- *    -80. We add 119 to make the ATTACKS array index non-negative (because the
- *    worst case difference is A8 - H1 = -119). The ATTACKS array contains a
- *    bitmask of pieces that can attack from that distance and direction.
- *    ATTACKS[-80 + 119=39] gives us 24 or 0b11000 in binary. Look at the
- *    PIECE_MASKS map to determine the mask for a given piece type. In our pawn
- *    example, we would check to see if 24 & 0x1 is non-zero, which it is
- *    not. So, naturally, a pawn on E7 can't attack a piece on E2. However, a
- *    rook can since 24 & 0x8 is non-zero. The only thing left to check is that
- *    there are no blocking pieces between E7 and E2. That's where the RAYS
- *    array comes in. It provides an offset (in this case 16) to add to E7 (20)
- *    to check for blocking pieces. E7 (20) + 16 = E6 (36) + 16 = E5 (52) etc.
- */
-
-// prettier-ignore
-// eslint-disable-next-line
-const Ox88: Record<Square, number> = {
-  a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
-  a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
-  a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
-  a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
-  a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
-  a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
-  a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
-  a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
-}
-
-const PAWN_OFFSETS = {
-  b: [16, 32, 17, 15],
-  w: [-16, -32, -17, -15],
-}
-
-const PIECE_OFFSETS = {
-  n: [-18, -33, -31, -14, 18, 33, 31, 14],
-  b: [-17, -15, 17, 15],
-  r: [-16, 1, 16, -1],
-  q: [-17, -16, -15, 1, 17, 16, 15, -1],
-  k: [-17, -16, -15, 1, 17, 16, 15, -1],
-}
-
-// prettier-ignore
-const ATTACKS = [
-  20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
-   0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-   0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-   0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-   0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-  24,24,24,24,24,24,56,  0, 56,24,24,24,24,24,24, 0,
-   0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-   0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-   0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-   0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-  20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20
-];
-
-// prettier-ignore
-const RAYS = [
-   17,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0, 15, 0,
-    0, 17,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0, 15,  0, 0,
-    0,  0, 17,  0,  0,  0,  0, 16,  0,  0,  0,  0, 15,  0,  0, 0,
-    0,  0,  0, 17,  0,  0,  0, 16,  0,  0,  0, 15,  0,  0,  0, 0,
-    0,  0,  0,  0, 17,  0,  0, 16,  0,  0, 15,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,  0, 17,  0, 16,  0, 15,  0,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,  0,  0, 17, 16, 15,  0,  0,  0,  0,  0,  0, 0,
-    1,  1,  1,  1,  1,  1,  1,  0, -1, -1,  -1,-1, -1, -1, -1, 0,
-    0,  0,  0,  0,  0,  0,-15,-16,-17,  0,  0,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,  0,-15,  0,-16,  0,-17,  0,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,-15,  0,  0,-16,  0,  0,-17,  0,  0,  0,  0, 0,
-    0,  0,  0,-15,  0,  0,  0,-16,  0,  0,  0,-17,  0,  0,  0, 0,
-    0,  0,-15,  0,  0,  0,  0,-16,  0,  0,  0,  0,-17,  0,  0, 0,
-    0,-15,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,-17,  0, 0,
-  -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
-];
-
-const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 }
-
-const SYMBOLS = 'pnbrqkPNBRQK'
-
-const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN]
-
-const RANK_1 = 7
-const RANK_2 = 6
-/*
- * const RANK_3 = 5
- * const RANK_4 = 4
- * const RANK_5 = 3
- * const RANK_6 = 2
- */
-const RANK_7 = 1
-const RANK_8 = 0
-
-const SIDES = {
-  [KING]: BITS.KSIDE_CASTLE,
-  [QUEEN]: BITS.QSIDE_CASTLE,
-}
-
-const ROOKS = {
-  w: [
-    { square: Ox88.a1, flag: BITS.QSIDE_CASTLE },
-    { square: Ox88.h1, flag: BITS.KSIDE_CASTLE },
-  ],
-  b: [
-    { square: Ox88.a8, flag: BITS.QSIDE_CASTLE },
-    { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
-  ],
-}
-
-const SECOND_RANK = { b: RANK_7, w: RANK_2 }
-
-const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
