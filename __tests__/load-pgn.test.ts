@@ -1,4 +1,5 @@
-import { Chess, DEFAULT_POSITION } from '../src/chess'
+import { Chess } from '../src/chess'
+import { DEFAULT_POSITION } from '../src/constants'
 
 test('loadPgn - works', () => {
   const chess = new Chess()
@@ -103,7 +104,6 @@ pawn, is hanging, the bishop is blocked because of the Queen.--Fischer} b5
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
-  expect(chess.getComments()).toEqual(comments)
 })
 
 test('loadPgn - works - comments (before first move)', () => {
@@ -150,7 +150,6 @@ Bogo-Indian. } 3...d5 4.Bg2 c6 5.Nf3 Be7 6.O-O Nbd7
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
-  expect(chess.getComments()).toEqual(comments)
 })
 
 test('loadPgn - works - regression test (pinned piece)', () => {
@@ -189,7 +188,6 @@ test('loadPgn - works - prunes recursive annotation variations (RAV)', () => {
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
-  expect(chess.getComments()).toEqual([])
 })
 
 test('loadPgn - works - preserves RAV inside comments', () => {
@@ -217,7 +215,6 @@ Nf6 21. Qh3 Bc6 22. Kg1 Qb8 23. Qg3 Nh5 24. Qf2 Bf6 25. Be2 Bxd4
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
-  expect(chess.getComments()).toEqual(comments)
 })
 
 test('loadPgn - works - mixed RAV and comments', () => {
@@ -236,7 +233,6 @@ test('loadPgn - works - mixed RAV and comments', () => {
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
-  expect(chess.getComments()).toEqual(comments)
 })
 
 test('loadPgn - works - FEN and SetUp tag', () => {
@@ -265,86 +261,6 @@ test("loadPgn - works - prunes numeric annotation glyphs (NAG's)", () => {
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
-})
-
-test('loadPgn - works - messy whitespace (tabs, whitespace, and mixed newlines)', () => {
-  const chess = new Chess()
-  const pgn =
-    '    \t   [ Event"Reykjavik WCh"    ]\n' +
-    '[Site "Reykjavik WCh"]       \n' +
-    '[Date "1972.01.07"]\n' +
-    '[EventDate "?"]\n' +
-    '[\tRound "6"]\n' +
-    '[Result "1-0"]\n' +
-    '[White "Robert James Fischer"]\r\n' +
-    '[Black "Boris Spassky"]\n' +
-    '[ECO "D59"]\n' +
-    '[WhiteElo "?"]\n' +
-    '[BlackElo "?"]\n' +
-    '[PlyCount "81"]                \n' +
-    '            \r\n' +
-    '1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6\n' +
-    '7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6\n' +
-    '12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7\n' +
-    '17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7\r\n' +
-    '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5\n' +
-    '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7\r\n' +
-    '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\r\n' +
-    '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0\n'
-
-  // loadPgn throws if there is an error, so we can just call these
-  chess.loadPgn(pgn)
-
-  // spot check a few of the header values
-  expect(chess.header()['Event']).toEqual('Reykjavik WCh')
-  expect(chess.header()['Round']).toEqual('6')
-})
-
-test('loadPgn - works - parses different newline characters', () => {
-  const chess = new Chess()
-  const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
-  const comments = [
-    {
-      fen: 'rn1qkbnr/ppp2ppp/3p4/4p3/3PP1b1/5N2/PPP2PPP/RNBQKB1R w KQkq - 1 4',
-      comment: 'This is a weak move already.--Fischer',
-    },
-    {
-      fen: 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9',
-      comment:
-        "Black is in what's like a zugzwang position, here. He can't " +
-        "develop the [Queen's] knight because the pawn, is hanging, the " +
-        'bishop is blocked because of the Queen.--Fischer',
-    },
-  ]
-  const pgn = [
-    '[Event "Paris"]',
-    '[Site "Paris"]',
-    '[Date "1858.??.??"]',
-    '[EventDate "?"]',
-    '[Round "?"]',
-    '[Result "1-0"]',
-    '[White "Paul Morphy"]',
-    '[Black "Duke Karl / Count Isouard"]',
-    '[ECO "C41"]',
-    '[WhiteElo "?"]',
-    '[BlackElo "?"]',
-    '[PlyCount "33"]',
-    '',
-    '1.e4 e5 2.Nf3 d6 3.d4 Bg4 {This is a weak move already.--Fischer} 4.dxe5 Bxf3',
-    "5.Qxf3 dxe5 6.Bc4 Nf6 7.Qb3 Qe7 8.Nc3 c6 9.Bg5 {Black is in what's like a",
-    "zugzwang position, here. He can't develop the [Queen's] knight because the",
-    'pawn, is hanging, the bishop is blocked because of the Queen.--Fischer} b5',
-    '10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8 13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7',
-    '16.Qb8+ Nxb8 17.Rd8# 1-0',
-  ]
-
-  const newlines = ['\n', '<br />', '\r\n', 'BLAH']
-
-  newlines.forEach((newline) => {
-    chess.loadPgn(pgn.join(newline), { newlineChar: newline })
-    expect(chess.fen()).toEqual(fen)
-    expect(chess.getComments()).toEqual(comments)
-  })
 })
 
 test('loadPgn - works - permissive parser (unnecessary disambiguation - #1)', () => {

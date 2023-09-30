@@ -1486,24 +1486,6 @@ export class Chess {
       return str.replace(/\\/g, '\\')
     }
 
-    function parsePgnHeader(header: string): { [key: string]: string } {
-      const headerObj: Record<string, string> = {}
-      const headers = header.split(new RegExp(mask(newlineChar)))
-      let key = ''
-      let value = ''
-
-      for (let i = 0; i < headers.length; i++) {
-        const regex = /^\s*\[\s*([A-Za-z]+)\s*"(.*)"\s*\]\s*$/
-        key = headers[i].replace(regex, '$1')
-        value = headers[i].replace(regex, '$2')
-        if (key.trim().length > 0) {
-          headerObj[key] = value
-        }
-      }
-
-      return headerObj
-    }
-
     // strip whitespace from head/tail of PGN block
     pgn = pgn.trim()
 

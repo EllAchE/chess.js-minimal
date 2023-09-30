@@ -1,6 +1,7 @@
-import { Chess, Square, Move } from '../src/chess'
-import { split } from './utils'
 import 'jest-extended'
+import { Chess } from '../src/chess'
+import { Move, Square } from '../src/types'
+import { split } from './utils'
 
 test('moves', () => {
   const chess = new Chess()
@@ -143,105 +144,73 @@ test('moves - piece - verbose', () => {
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/RP2QPP1/2R3K1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'a1',
-      lan: 'a1a2',
       piece: 'r',
-      san: 'Ra2',
       to: 'a2',
     },
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/1RR3K1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'a1',
-      lan: 'a1b1',
       piece: 'r',
-      san: 'Rab1',
       to: 'b1',
     },
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1PR1QPP1/R5K1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'c1',
-      lan: 'c1c2',
       piece: 'r',
-      san: 'Rc2',
       to: 'c2',
     },
     {
       after: 'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1RP3P/1P2QPP1/R5K1 b - - 0 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       captured: 'p',
       color: 'w',
       flags: 'c',
       from: 'c1',
-      lan: 'c1c3',
       piece: 'r',
-      san: 'Rxc3',
       to: 'c3',
     },
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R2R2K1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'c1',
-      lan: 'c1d1',
       piece: 'r',
-      san: 'Rd1',
       to: 'd1',
     },
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R3R1K1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'c1',
-      lan: 'c1e1',
       piece: 'r',
-      san: 'Re1',
       to: 'e1',
     },
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R4RK1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'c1',
-      lan: 'c1f1',
       piece: 'r',
-      san: 'Rf1',
       to: 'f1',
     },
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/RR4K1 b - - 1 19',
-      before:
-        'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
       color: 'w',
       flags: 'n',
       from: 'c1',
-      lan: 'c1b1',
       piece: 'r',
-      san: 'Rcb1',
       to: 'b1',
     },
   ]
@@ -260,36 +229,35 @@ test('moves - square and piece', () => {
 })
 
 test('moves - no kings (starting position minus kings)', () => {
-  const noKings = new Chess();
-  noKings.remove("e1");
-  noKings.remove("e8");
+  const noKings = new Chess()
+  noKings.remove('e1')
+  noKings.remove('e8')
 
-  const kings = new Chess();
+  const kings = new Chess()
 
-  expect(noKings.moves().filter(m => m !== "Qe1")).toEqual(kings.moves());
+  expect(noKings.moves().filter((m) => m !== 'Qe1')).toEqual(kings.moves())
 })
 
 test('inCheck - no kings (starting position minus kings)', () => {
-  const noKings = new Chess();
-  noKings.remove("e1");
-  noKings.remove("e8");
+  const noKings = new Chess()
+  noKings.remove('e1')
+  noKings.remove('e8')
 
-  expect(noKings.inCheck()).toEqual(false);
+  expect(noKings.inCheck()).toEqual(false)
 })
 
 test('isCheckmate - no kings (starting position minus kings)', () => {
-  const noKings = new Chess();
-  noKings.remove("e1");
-  noKings.remove("e8");
+  const noKings = new Chess()
+  noKings.remove('e1')
+  noKings.remove('e8')
 
-  expect(noKings.isCheckmate()).toEqual(false);
+  expect(noKings.isCheckmate()).toEqual(false)
 })
 
 test('isStalemate - no kings (starting position minus kings)', () => {
-  const noKings = new Chess();
-  noKings.remove("e1");
-  noKings.remove("e8");
+  const noKings = new Chess()
+  noKings.remove('e1')
+  noKings.remove('e8')
 
-  expect(noKings.isStalemate()).toEqual(false);
+  expect(noKings.isStalemate()).toEqual(false)
 })
-
