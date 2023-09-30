@@ -1735,7 +1735,7 @@ export class Chess {
   }
 
   loadPgn(
-    pgn: string,
+    pgnMoveLine: string,
     {
       strict = false,
       newlineChar = '\r?\n',
@@ -1745,94 +1745,11 @@ export class Chess {
       return str.replace(/\\/g, '\\');
     }
 
-    function parsePgnHeader(header: string): { [key: string]: string } {
-      const headerObj: Record<string, string> = {};
-      const headers = header.split(new RegExp(mask(newlineChar)));
-      let key = '';
-      let value = '';
-
-      for (let i = 0; i < headers.length; i++) {
-        const regex = /^\s*\[\s*([A-Za-z]+)\s*"(.*)"\s*\]\s*$/;
-        key = headers[i].replace(regex, '$1');
-        value = headers[i].replace(regex, '$2');
-        if (key.trim().length > 0) {
-          headerObj[key] = value;
-        }
-      }
-
-      return headerObj;
-    }
-
     // strip whitespace from head/tail of PGN block
-    pgn = pgn.trim();
-
-    /*
-     * RegExp to split header. Takes advantage of the fact that header and movetext
-     * will always have a blank line between them (ie, two newline_char's). Handles
-     * case where movetext is empty by matching newlineChar until end of string is
-     * matched - effectively trimming from the end extra newlineChar.
-     *
-     * With default newline_char, will equal:
-     * /^(\[((?:\r?\n)|.)*\])((?:\s*\r?\n){2}|(?:\s*\r?\n)*$)/
-     */
-    const headerRegex = new RegExp(
-      '^(\\[((?:' +
-        mask(newlineChar) +
-        ')|.)*\\])' +
-        '((?:\\s*' +
-        mask(newlineChar) +
-        '){2}|(?:\\s*' +
-        mask(newlineChar) +
-        ')*$)'
-    );
-
-    // If no header given, begin with moves.
-    const headerRegexResults = headerRegex.exec(pgn);
-    const headerString = headerRegexResults
-      ? headerRegexResults.length >= 2
-        ? headerRegexResults[1]
-        : ''
-      : '';
+    pgnMoveLine = pgnMoveLine.trim();
 
     // Put the board in the starting position
     this.reset();
-
-    // parse PGN header
-    const headers = parsePgnHeader(headerString);
-    let fen = '';
-
-    for (const key in headers) {
-      // check to see user is including fen (possibly with wrong tag case)
-      if (key.toLowerCase() === 'fen') {
-        fen = headers[key];
-      }
-
-      this.header(key, headers[key]);
-    }
-
-    /*
-     * the permissive parser should attempt to load a fen tag, even if it's the
-     * wrong case and doesn't include a corresponding [SetUp "1"] tag
-     */
-    if (!strict) {
-      if (fen) {
-        this.load(fen, true);
-      }
-    } else {
-      /*
-       * strict parser - load the starting position indicated by [Setup '1']
-       * and [FEN position]
-       */
-      if (headers['SetUp'] === '1') {
-        if (!('FEN' in headers)) {
-          throw new Error(
-            'Invalid PGN: FEN tag must be supplied with SetUp tag'
-          );
-        }
-        // second argument to load: don't clear the headers
-        this.load(headers['FEN'], true);
-      }
-    }
 
     /*
      * NB: the regexes below that delete move numbers, recursive annotations,
@@ -1877,8 +1794,7 @@ export class Chess {
     };
 
     // delete header to get the moves
-    let ms = pgn
-      .replace(headerString, '')
+    let ms = pgnMoveLine
       .replace(
         // encode comments so they don't get deleted below
         new RegExp(`({[^}]*})+?|;([^${mask(newlineChar)}]*)`, 'g'),
