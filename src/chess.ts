@@ -337,8 +337,8 @@ export class Chess {
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
-  constructor(fen = DEFAULT_POSITION) {
-    this.load(fen)
+  constructor(pgn: string) {
+    this.loadPgn(pgn)
   }
 
   clear(keepHeaders = false) {
@@ -359,66 +359,6 @@ export class Chess {
     if (key in this._header) {
       delete this._header[key]
     }
-  }
-
-  load(fen: string, keepHeaders = false) {
-    let tokens = fen.split(/\s+/)
-
-    // append commonly omitted fen tokens
-    if (tokens.length >= 2 && tokens.length < 6) {
-      const adjustments = ['-', '-', '0', '1']
-      fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ')
-    }
-
-    tokens = fen.split(/\s+/)
-
-    const { ok, error } = validateFen(fen)
-    if (!ok) {
-      throw new Error(error)
-    }
-
-    const position = tokens[0]
-    let square = 0
-
-    this.clear(keepHeaders)
-
-    for (let i = 0; i < position.length; i++) {
-      const piece = position.charAt(i)
-
-      if (piece === '/') {
-        square += 8
-      } else if (isDigit(piece)) {
-        square += parseInt(piece, 10)
-      } else {
-        const color = piece < 'a' ? WHITE : BLACK
-        this._put(
-          { type: piece.toLowerCase() as PieceSymbol, color },
-          algebraic(square)
-        )
-        square++
-      }
-    }
-
-    this._turn = tokens[1] as Color
-
-    if (tokens[2].indexOf('K') > -1) {
-      this._castling.w |= BITS.KSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('Q') > -1) {
-      this._castling.w |= BITS.QSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('k') > -1) {
-      this._castling.b |= BITS.KSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('q') > -1) {
-      this._castling.b |= BITS.QSIDE_CASTLE
-    }
-
-    this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
-    this._halfMoves = parseInt(tokens[4], 10)
-    this._moveNumber = parseInt(tokens[5], 10)
-
-    this._updateSetup(fen)
   }
 
   fen() {
@@ -1305,15 +1245,6 @@ export class Chess {
     return move
   }
 
-  header(...args: string[]) {
-    for (let i = 0; i < args.length; i += 2) {
-      if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
-        this._header[args[i]] = args[i + 1]
-      }
-    }
-    return this._header
-  }
-
   loadPgn(
     pgn: string,
     {
@@ -1418,16 +1349,6 @@ export class Chess {
         result = ''
         this._makeMove(move)
       }
-    }
-
-    /*
-     * Per section 8.2.6 of the PGN spec, the Result tag pair must match match
-     * the termination marker. Only do this when headers are present, but the
-     * result tag is missing
-     */
-
-    if (result && Object.keys(this._header).length && !this._header['Result']) {
-      this.header('Result', result)
     }
   }
 
@@ -1614,26 +1535,6 @@ export class Chess {
     return null
   }
 
-  perft(depth: number) {
-    const moves = this._moves({ legal: false })
-    let nodes = 0
-    const color = this._turn
-
-    for (let i = 0, len = moves.length; i < len; i++) {
-      this._makeMove(moves[i])
-      if (!this._isKingAttacked(color)) {
-        if (depth - 1 > 0) {
-          nodes += this.perft(depth - 1)
-        } else {
-          nodes++
-        }
-      }
-      this._undoMove()
-    }
-
-    return nodes
-  }
-
   // pretty = external move object
   private _makePretty(uglyMove: InternalMove): Move {
     const { color, piece, from, to, flags, captured, promotion } = uglyMove
@@ -1679,39 +1580,6 @@ export class Chess {
     return this._turn
   }
 
-  board() {
-    const output = []
-    let row = []
-
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      if (this._board[i] == null) {
-        row.push(null)
-      } else {
-        row.push({
-          square: algebraic(i),
-          type: this._board[i].type,
-          color: this._board[i].color,
-        })
-      }
-      if ((i + 1) & 0x88) {
-        output.push(row)
-        row = []
-        i += 8
-      }
-    }
-
-    return output
-  }
-
-  squareColor(square: Square) {
-    if (square in Ox88) {
-      const sq = Ox88[square]
-      return (rank(sq) + file(sq)) % 2 === 0 ? 'light' : 'dark'
-    }
-
-    return null
-  }
-
   history(): string[]
   history({ verbose }: { verbose: true }): Move[]
   history({ verbose }: { verbose: false }): string[]
@@ -1746,9 +1614,5 @@ export class Chess {
       [KING]: (this._castling[color] & SIDES[KING]) !== 0,
       [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
     }
-  }
-
-  moveNumber() {
-    return this._moveNumber
   }
 }
