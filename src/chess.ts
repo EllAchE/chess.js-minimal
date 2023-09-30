@@ -25,105 +25,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const WHITE = 'w'
-export const BLACK = 'b'
-
-export const PAWN = 'p'
-export const KNIGHT = 'n'
-export const BISHOP = 'b'
-export const ROOK = 'r'
-export const QUEEN = 'q'
-export const KING = 'k'
-
-export type Color = 'w' | 'b'
-export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
-
-// prettier-ignore
-export type Square =
-    'a8' | 'b8' | 'c8' | 'd8' | 'e8' | 'f8' | 'g8' | 'h8' |
-    'a7' | 'b7' | 'c7' | 'd7' | 'e7' | 'f7' | 'g7' | 'h7' |
-    'a6' | 'b6' | 'c6' | 'd6' | 'e6' | 'f6' | 'g6' | 'h6' |
-    'a5' | 'b5' | 'c5' | 'd5' | 'e5' | 'f5' | 'g5' | 'h5' |
-    'a4' | 'b4' | 'c4' | 'd4' | 'e4' | 'f4' | 'g4' | 'h4' |
-    'a3' | 'b3' | 'c3' | 'd3' | 'e3' | 'f3' | 'g3' | 'h3' |
-    'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
-    'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
-
-export const DEFAULT_POSITION =
-  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-
-export type Piece = {
-  color: Color
-  type: PieceSymbol
-}
-
-type InternalMove = {
-  color: Color
-  from: number
-  to: number
-  piece: PieceSymbol
-  captured?: PieceSymbol
-  promotion?: PieceSymbol
-  flags: number
-}
-
-interface History {
-  move: InternalMove
-  kings: Record<Color, number>
-  turn: Color
-  castling: Record<Color, number>
-  epSquare: number
-  halfMoves: number
-  moveNumber: number
-}
-
-export type Move = {
-  color: Color
-  from: Square
-  to: Square
-  piece: PieceSymbol
-  captured?: PieceSymbol
-  promotion?: PieceSymbol
-  flags: string
-  san: string
-  lan: string
-  before: string
-  after: string
-}
-
-const EMPTY = -1
-
-const FLAGS: Record<string, string> = {
-  NORMAL: 'n',
-  CAPTURE: 'c',
-  BIG_PAWN: 'b',
-  EP_CAPTURE: 'e',
-  PROMOTION: 'p',
-  KSIDE_CASTLE: 'k',
-  QSIDE_CASTLE: 'q',
-}
-
-// prettier-ignore
-export const SQUARES: Square[] = [
-  'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
-  'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
-  'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
-  'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
-  'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
-  'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
-  'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
-  'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
-]
-
-const BITS: Record<string, number> = {
-  NORMAL: 1,
-  CAPTURE: 2,
-  BIG_PAWN: 4,
-  EP_CAPTURE: 8,
-  PROMOTION: 16,
-  KSIDE_CASTLE: 32,
-  QSIDE_CASTLE: 64,
-}
+import {
+  BISHOP,
+  BITS,
+  BLACK,
+  DEFAULT_POSITION,
+  EMPTY,
+  FLAGS,
+  KING,
+  KNIGHT,
+  PAWN,
+  QUEEN,
+  ROOK,
+  WHITE,
+} from './constants'
+import {
+  Color,
+  History,
+  InternalMove,
+  Move,
+  Piece,
+  PieceSymbol,
+  Square,
+} from './types'
 
 /*
  * NOTES ABOUT 0x88 MOVE GENERATION ALGORITHM
@@ -538,7 +462,6 @@ export class Chess {
   private _history: History[] = []
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
-  private _positionCounts: Record<string, number> = {}
 
   constructor(fen = DEFAULT_POSITION) {
     this.load(fen)
@@ -556,29 +479,6 @@ export class Chess {
     this._comments = {}
     this._header = keepHeaders ? this._header : {}
     this._updateSetup(this.fen())
-    /*
-     * Instantiate a proxy that keeps track of position occurrence counts for the purpose
-     * of repetition checking. The getter and setter methods automatically handle trimming
-     * irrelevent information from the fen, initialising new positions, and removing old
-     * positions from the record if their counts are reduced to 0.
-     */
-    this._positionCounts = new Proxy({} as Record<string, number>, {
-      get: (target, position: string) =>
-        position === 'length'
-          ? Object.keys(target).length // length for unit testing
-          : target?.[this._trimFen(position)] || 0,
-      set: (target, position: string, count: number) => {
-        const trimmedFen = this._trimFen(position)
-        if (count === 0) delete target[trimmedFen]
-        else target[trimmedFen] = count
-        return true
-      },
-    })
-  }
-
-  private _trimFen(fen: string): string {
-    // remove last two fields in FEN string as they're not needed when checking for repetition
-    return fen.split(' ').slice(0, 4).join(' ')
   }
 
   removeHeader(key: string) {
@@ -645,7 +545,6 @@ export class Chess {
     this._moveNumber = parseInt(tokens[5], 10)
 
     this._updateSetup(fen)
-    this._positionCounts[fen]++
   }
 
   fen() {
@@ -1050,27 +949,6 @@ export class Chess {
     return false
   }
 
-  private _getRepetitionCount() {
-    return this._positionCounts[this.fen()]
-  }
-
-  isThreefoldRepetition(): boolean {
-    return this._getRepetitionCount() >= 3
-  }
-
-  isDraw() {
-    return (
-      this._halfMoves >= 100 || // 50 moves per side = 100 half moves
-      this.isStalemate() ||
-      this.isInsufficientMaterial() ||
-      this.isThreefoldRepetition()
-    )
-  }
-
-  isGameOver() {
-    return this.isCheckmate() || this.isStalemate() || this.isDraw()
-  }
-
   moves(): string[]
   moves({ square }: { square: Square }): string[]
   moves({ piece }: { piece: PieceSymbol }): string[]
@@ -1391,7 +1269,6 @@ export class Chess {
     const prettyMove = this._makePretty(moveObj)
 
     this._makeMove(moveObj)
-    this._positionCounts[prettyMove.after]++
     return prettyMove
   }
 
@@ -1501,16 +1378,6 @@ export class Chess {
     }
 
     this._turn = them
-  }
-
-  undo() {
-    const move = this._undoMove()
-    if (move) {
-      const prettyMove = this._makePretty(move)
-      this._positionCounts[prettyMove.after]--
-      return prettyMove
-    }
-    return null
   }
 
   private _undoMove() {
@@ -1868,7 +1735,6 @@ export class Chess {
         // reset the end of game marker if making a valid move
         result = ''
         this._makeMove(move)
-        this._positionCounts[this.fen()]++
       }
     }
 
@@ -2066,35 +1932,6 @@ export class Chess {
     return null
   }
 
-  ascii() {
-    let s = '   +------------------------+\n'
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // display the rank
-      if (file(i) === 0) {
-        s += ' ' + '87654321'[rank(i)] + ' |'
-      }
-
-      if (this._board[i]) {
-        const piece = this._board[i].type
-        const color = this._board[i].color
-        const symbol =
-          color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
-        s += ' ' + symbol + ' '
-      } else {
-        s += ' . '
-      }
-
-      if ((i + 1) & 0x88) {
-        s += '|\n'
-        i += 8
-      }
-    }
-    s += '   +------------------------+\n'
-    s += '     a  b  c  d  e  f  g  h'
-
-    return s
-  }
-
   perft(depth: number) {
     const moves = this._moves({ legal: false })
     let nodes = 0
@@ -2135,10 +1972,9 @@ export class Chess {
       piece,
       from: fromAlgebraic,
       to: toAlgebraic,
-      san: this._moveToSan(uglyMove, this._moves({ legal: true })),
+      // san: this._moveToSan(uglyMove, this._moves({ legal: true })),
       flags: prettyFlags,
-      lan: fromAlgebraic + toAlgebraic,
-      before: this.fen(),
+      // before: this.fen(),
       after: '',
     }
 
@@ -2152,7 +1988,6 @@ export class Chess {
     }
     if (promotion) {
       move.promotion = promotion
-      move.lan += promotion
     }
 
     return move
@@ -2222,86 +2057,6 @@ export class Chess {
     }
 
     return moveHistory
-  }
-
-  private _pruneComments() {
-    const reversedHistory = []
-    const currentComments: Record<string, string> = {}
-
-    const copyComment = (fen: string) => {
-      if (fen in this._comments) {
-        currentComments[fen] = this._comments[fen]
-      }
-    }
-
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
-    }
-
-    copyComment(this.fen())
-
-    while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
-        break
-      }
-      this._makeMove(move)
-      copyComment(this.fen())
-    }
-    this._comments = currentComments
-  }
-
-  getComment() {
-    return this._comments[this.fen()]
-  }
-
-  setComment(comment: string) {
-    this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']')
-  }
-
-  deleteComment() {
-    const comment = this._comments[this.fen()]
-    delete this._comments[this.fen()]
-    return comment
-  }
-
-  getComments() {
-    this._pruneComments()
-    return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] }
-    })
-  }
-
-  deleteComments() {
-    this._pruneComments()
-    return Object.keys(this._comments).map((fen) => {
-      const comment = this._comments[fen]
-      delete this._comments[fen]
-      return { fen: fen, comment: comment }
-    })
-  }
-
-  setCastlingRights(
-    color: Color,
-    rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>
-  ) {
-    for (const side of [KING, QUEEN] as const) {
-      if (rights[side] !== undefined) {
-        if (rights[side]) {
-          this._castling[color] |= SIDES[side]
-        } else {
-          this._castling[color] &= ~SIDES[side]
-        }
-      }
-    }
-
-    this._updateCastlingRights()
-    const result = this.getCastlingRights(color)
-
-    return (
-      (rights[KING] === undefined || rights[KING] === result[KING]) &&
-      (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
-    )
   }
 
   getCastlingRights(color: Color) {
