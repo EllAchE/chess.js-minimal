@@ -1828,55 +1828,6 @@ export class Chess {
     return null;
   }
 
-  ascii() {
-    let s = '   +------------------------+\n';
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // display the rank
-      if (file(i) === 0) {
-        s += ' ' + '87654321'[rank(i)] + ' |';
-      }
-
-      if (this._board[i]) {
-        const piece = this._board[i].type;
-        const color = this._board[i].color;
-        const symbol =
-          color === WHITE ? piece.toUpperCase() : piece.toLowerCase();
-        s += ' ' + symbol + ' ';
-      } else {
-        s += ' . ';
-      }
-
-      if ((i + 1) & 0x88) {
-        s += '|\n';
-        i += 8;
-      }
-    }
-    s += '   +------------------------+\n';
-    s += '     a  b  c  d  e  f  g  h';
-
-    return s;
-  }
-
-  perft(depth: number) {
-    const moves = this._moves({ legal: false });
-    let nodes = 0;
-    const color = this._turn;
-
-    for (let i = 0, len = moves.length; i < len; i++) {
-      this._makeMove(moves[i]);
-      if (!this._isKingAttacked(color)) {
-        if (depth - 1 > 0) {
-          nodes += this.perft(depth - 1);
-        } else {
-          nodes++;
-        }
-      }
-      this._undoMove();
-    }
-
-    return nodes;
-  }
-
   // pretty = external move object
   private _makePretty(uglyMove: InternalMove): Move {
     const { color, piece, from, to, flags, captured, promotion } = uglyMove;
