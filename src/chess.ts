@@ -1539,22 +1539,8 @@ export class Chess {
       newlineChar = '\r?\n',
     }: { strict?: boolean; newlineChar?: string } = {}
   ) {
-    // strip whitespace from head/tail of PGN block
-    pgnMoveLine = pgnMoveLine.trim();
-
     // Put the board in the starting position
     this.reset();
-
-    /*
-     * NB: the regexes below that delete move numbers, recursive annotations,
-     * and numeric annotation glyphs may also match text in comments. To
-     * prevent this, we transform comments by hex-encoding them in place and
-     * decoding them again after the other tokens have been deleted.
-     *
-     * While the spec states that PGN files should be ASCII encoded, we use
-     * {en,de}codeURIComponent here to support arbitrary UTF8 as a convenience
-     * for modern users
-     */
 
     function toHex(s: string): string {
       return Array.from(s)
@@ -1586,22 +1572,8 @@ export class Chess {
       }
     };
 
-    // delete header to get the moves
-    let ms = pgnMoveLine.replace(
-      // encode comments so they don't get deleted below
-      new RegExp(`({[^}]*})+?|;([^\\\n]*)`, 'g'),
-      function (_match, bracket, semicolon) {
-        return bracket !== undefined
-          ? encodeComment(bracket)
-          : ' ' + encodeComment(`{${semicolon.slice(1)}}`);
-      }
-    );
-
-    // delete recursive annotation variations
-    const ravRegex = /(\([^()]+\))+?/g;
-    while (ravRegex.test(ms)) {
-      ms = ms.replace(ravRegex, '');
-    }
+    // We don't mind destructive deletion of the comments
+    let ms = pgnMoveLine.replace(new RegExp(`({[^}]*})+?`, 'g'), '');
 
     // delete move numbers
     ms = ms.replace(/\d+\.(\.\.)?/g, '');
@@ -1613,7 +1585,8 @@ export class Chess {
     ms = ms.replace(/\$\d+/g, '');
 
     // trim and get array of moves
-    let moves = ms.trim().split(new RegExp(/\s+/));
+    // let moves = ms.trim().split(new RegExp(/\s+/));
+    let moves = ms.trim().split(new RegExp(' '));
 
     // delete empty entries
     moves = moves.filter((move) => move !== '');
