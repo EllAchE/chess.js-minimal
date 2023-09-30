@@ -541,7 +541,6 @@ export class Chess {
   private _history: History[] = [];
   private _comments: Record<string, string> = {};
   private _castling: Record<Color, number> = { w: 0, b: 0 };
-  private _positionCounts: Record<string, number> = {};
 
   constructor(fen = DEFAULT_POSITION) {
     this.load(fen);
@@ -559,29 +558,6 @@ export class Chess {
     this._comments = {};
     this._header = keepHeaders ? this._header : {};
     this._updateSetup(this.fen());
-    /*
-     * Instantiate a proxy that keeps track of position occurrence counts for the purpose
-     * of repetition checking. The getter and setter methods automatically handle trimming
-     * irrelevent information from the fen, initialising new positions, and removing old
-     * positions from the record if their counts are reduced to 0.
-     */
-    this._positionCounts = new Proxy({} as Record<string, number>, {
-      get: (target, position: string) =>
-        position === 'length'
-          ? Object.keys(target).length // length for unit testing
-          : target?.[this._trimFen(position)] || 0,
-      set: (target, position: string, count: number) => {
-        const trimmedFen = this._trimFen(position);
-        if (count === 0) delete target[trimmedFen];
-        else target[trimmedFen] = count;
-        return true;
-      },
-    });
-  }
-
-  private _trimFen(fen: string): string {
-    // remove last two fields in FEN string as they're not needed when checking for repetition
-    return fen.split(' ').slice(0, 4).join(' ');
   }
 
   removeHeader(key: string) {
@@ -648,7 +624,6 @@ export class Chess {
     this._moveNumber = parseInt(tokens[5], 10);
 
     this._updateSetup(this.fen());
-    this._positionCounts[fen]++;
   }
 
   fen() {
@@ -1050,20 +1025,11 @@ export class Chess {
     return false;
   }
 
-  private _getRepetitionCount() {
-    return this._positionCounts[this.fen()];
-  }
-
-  isThreefoldRepetition(): boolean {
-    return this._getRepetitionCount() >= 3;
-  }
-
   isDraw() {
     return (
       this._halfMoves >= 100 || // 50 moves per side = 100 half moves
       this.isStalemate() ||
-      this.isInsufficientMaterial() ||
-      this.isThreefoldRepetition()
+      this.isInsufficientMaterial()
     );
   }
 
@@ -1391,7 +1357,6 @@ export class Chess {
     const prettyMove = this._makePretty(moveObj);
 
     this._makeMove(moveObj);
-    this._positionCounts[prettyMove.after]++;
     return prettyMove;
   }
 
@@ -1507,7 +1472,6 @@ export class Chess {
     const move = this._undoMove();
     if (move) {
       const prettyMove = this._makePretty(move);
-      this._positionCounts[prettyMove.after]--;
       return prettyMove;
     }
     return null;
@@ -1741,10 +1705,6 @@ export class Chess {
       newlineChar = '\r?\n',
     }: { strict?: boolean; newlineChar?: string } = {}
   ) {
-    function mask(str: string): string {
-      return str.replace(/\\/g, '\\');
-    }
-
     // strip whitespace from head/tail of PGN block
     pgnMoveLine = pgnMoveLine.trim();
 
@@ -1783,7 +1743,6 @@ export class Chess {
     }
 
     const encodeComment = function (s: string) {
-      s = s.replace(new RegExp(mask(newlineChar), 'g'), ' ');
       return `{${toHex(s.slice(1, s.length - 1))}}`;
     };
 
@@ -1794,17 +1753,15 @@ export class Chess {
     };
 
     // delete header to get the moves
-    let ms = pgnMoveLine
-      .replace(
-        // encode comments so they don't get deleted below
-        new RegExp(`({[^}]*})+?|;([^${mask(newlineChar)}]*)`, 'g'),
-        function (_match, bracket, semicolon) {
-          return bracket !== undefined
-            ? encodeComment(bracket)
-            : ' ' + encodeComment(`{${semicolon.slice(1)}}`);
-        }
-      )
-      .replace(new RegExp(mask(newlineChar), 'g'), ' ');
+    let ms = pgnMoveLine.replace(
+      // encode comments so they don't get deleted below
+      new RegExp(`({[^}]*})+?|;([^\\\n]*)`, 'g'),
+      function (_match, bracket, semicolon) {
+        return bracket !== undefined
+          ? encodeComment(bracket)
+          : ' ' + encodeComment(`{${semicolon.slice(1)}}`);
+      }
+    );
 
     // delete recursive annotation variations
     const ravRegex = /(\([^()]+\))+?/g;
@@ -1816,7 +1773,7 @@ export class Chess {
     ms = ms.replace(/\d+\.(\.\.)?/g, '');
 
     // delete ... indicating black to move
-    ms = ms.replace(/\.\.\./g, '');
+    ms = ms.replace('...', '');
 
     /* delete numeric annotation glyphs */
     ms = ms.replace(/\$\d+/g, '');
@@ -1850,7 +1807,6 @@ export class Chess {
         // reset the end of game marker if making a valid move
         result = '';
         this._makeMove(move);
-        this._positionCounts[this.fen()]++;
       }
     }
 
