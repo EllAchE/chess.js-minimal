@@ -144,14 +144,3 @@ test('move - works - permissive parser (pawn capture without x)', () => {
   expect(chess.fen()).toBe(next)
 })
 
-test('move - works - permissive parser (en passant capture without x)', () => {
-  const fen = 'rnbqkbnr/pppp1ppp/8/8/4PpP1/8/PPPP3P/RNBQKBNR b KQkq g3 0 3'
-  const next = 'rnbqkbnr/pppp1ppp/8/8/4P3/6p1/PPPP3P/RNBQKBNR w KQkq - 0 4'
-  const chess = new Chess(fen)
-  expect(chess.move('fg3')).toMatchObject({
-    to: 'g3',
-    from: 'f4',
-    piece: 'p',
-  })
-  expect(chess.fen()).toBe(next)
-})

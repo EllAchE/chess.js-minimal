@@ -1,6 +1,7 @@
-import { Chess, DEFAULT_POSITION } from '../src/chess'
-import { split } from './utils'
 import 'jest-extended'
+import { Chess } from '../src/chess'
+import { DEFAULT_POSITION } from '../src/constants'
+import { split } from './utils'
 
 const positions = [
   {

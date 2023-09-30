@@ -337,8 +337,8 @@ export class Chess {
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
-  constructor(pgn: string) {
-    this.loadPgn(pgn)
+  constructor(pgn?: string) {
+    if (pgn) this.loadPgn(pgn)
   }
 
   clear(keepHeaders = false) {
