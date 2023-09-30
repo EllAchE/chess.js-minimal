@@ -25,18 +25,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const WHITE = 'w'
-export const BLACK = 'b'
+export const WHITE = 'w';
+export const BLACK = 'b';
 
-export const PAWN = 'p'
-export const KNIGHT = 'n'
-export const BISHOP = 'b'
-export const ROOK = 'r'
-export const QUEEN = 'q'
-export const KING = 'k'
+export const PAWN = 'p';
+export const KNIGHT = 'n';
+export const BISHOP = 'b';
+export const ROOK = 'r';
+export const QUEEN = 'q';
+export const KING = 'k';
 
-export type Color = 'w' | 'b'
-export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
+export type Color = 'w' | 'b';
+export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
 
 // prettier-ignore
 export type Square =
@@ -50,48 +50,48 @@ export type Square =
     'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
 
 export const DEFAULT_POSITION =
-  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 export type Piece = {
-  color: Color
-  type: PieceSymbol
-}
+  color: Color;
+  type: PieceSymbol;
+};
 
 type InternalMove = {
-  color: Color
-  from: number
-  to: number
-  piece: PieceSymbol
-  captured?: PieceSymbol
-  promotion?: PieceSymbol
-  flags: number
-}
+  color: Color;
+  from: number;
+  to: number;
+  piece: PieceSymbol;
+  captured?: PieceSymbol;
+  promotion?: PieceSymbol;
+  flags: number;
+};
 
 interface History {
-  move: InternalMove
-  kings: Record<Color, number>
-  turn: Color
-  castling: Record<Color, number>
-  epSquare: number
-  halfMoves: number
-  moveNumber: number
+  move: InternalMove;
+  kings: Record<Color, number>;
+  turn: Color;
+  castling: Record<Color, number>;
+  epSquare: number;
+  halfMoves: number;
+  moveNumber: number;
 }
 
 export type Move = {
-  color: Color
-  from: Square
-  to: Square
-  piece: PieceSymbol
-  captured?: PieceSymbol
-  promotion?: PieceSymbol
-  flags: string
-  san: string
-  lan: string
-  before: string
-  after: string
-}
+  color: Color;
+  from: Square;
+  to: Square;
+  piece: PieceSymbol;
+  captured?: PieceSymbol;
+  promotion?: PieceSymbol;
+  flags: string;
+  san: string;
+  lan: string;
+  before: string;
+  after: string;
+};
 
-const EMPTY = -1
+const EMPTY = -1;
 
 const FLAGS: Record<string, string> = {
   NORMAL: 'n',
@@ -101,7 +101,7 @@ const FLAGS: Record<string, string> = {
   PROMOTION: 'p',
   KSIDE_CASTLE: 'k',
   QSIDE_CASTLE: 'q',
-}
+};
 
 // prettier-ignore
 export const SQUARES: Square[] = [
@@ -123,7 +123,7 @@ const BITS: Record<string, number> = {
   PROMOTION: 16,
   KSIDE_CASTLE: 32,
   QSIDE_CASTLE: 64,
-}
+};
 
 /*
  * NOTES ABOUT 0x88 MOVE GENERATION ALGORITHM
@@ -180,7 +180,7 @@ const Ox88: Record<Square, number> = {
 const PAWN_OFFSETS = {
   b: [16, 32, 17, 15],
   w: [-16, -32, -17, -15],
-}
+};
 
 const PIECE_OFFSETS = {
   n: [-18, -33, -31, -14, 18, 33, 31, 14],
@@ -188,7 +188,7 @@ const PIECE_OFFSETS = {
   r: [-16, 1, 16, -1],
   q: [-17, -16, -15, 1, 17, 16, 15, -1],
   k: [-17, -16, -15, 1, 17, 16, 15, -1],
-}
+};
 
 // prettier-ignore
 const ATTACKS = [
@@ -228,27 +228,254 @@ const RAYS = [
   -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
 ];
 
-const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 }
+const STARTING_BOARD = [
+  {
+    type: 'r',
+    color: 'b',
+  },
+  {
+    type: 'n',
+    color: 'b',
+  },
+  {
+    type: 'b',
+    color: 'b',
+  },
+  {
+    type: 'q',
+    color: 'b',
+  },
+  {
+    type: 'k',
+    color: 'b',
+  },
+  {
+    type: 'b',
+    color: 'b',
+  },
+  {
+    type: 'n',
+    color: 'b',
+  },
+  {
+    type: 'r',
+    color: 'b',
+  },
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  {
+    type: 'p',
+    color: 'b',
+  },
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  {
+    type: 'p',
+    color: 'w',
+  },
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  {
+    type: 'r',
+    color: 'w',
+  },
+  {
+    type: 'n',
+    color: 'w',
+  },
+  {
+    type: 'b',
+    color: 'w',
+  },
+  {
+    type: 'q',
+    color: 'w',
+  },
+  {
+    type: 'k',
+    color: 'w',
+  },
+  {
+    type: 'b',
+    color: 'w',
+  },
+  {
+    type: 'n',
+    color: 'w',
+  },
+  {
+    type: 'r',
+    color: 'w',
+  },
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+];
 
-const SYMBOLS = 'pnbrqkPNBRQK'
+const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 };
 
-const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN]
+const SYMBOLS = 'pnbrqkPNBRQK';
 
-const RANK_1 = 7
-const RANK_2 = 6
+const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN];
+
+const RANK_1 = 7;
+const RANK_2 = 6;
 /*
  * const RANK_3 = 5
  * const RANK_4 = 4
  * const RANK_5 = 3
  * const RANK_6 = 2
  */
-const RANK_7 = 1
-const RANK_8 = 0
+const RANK_7 = 1;
+const RANK_8 = 0;
 
 const SIDES = {
   [KING]: BITS.KSIDE_CASTLE,
-  [QUEEN]: BITS.QSIDE_CASTLE
-}
+  [QUEEN]: BITS.QSIDE_CASTLE,
+};
 
 const ROOKS = {
   w: [
@@ -259,191 +486,66 @@ const ROOKS = {
     { square: Ox88.a8, flag: BITS.QSIDE_CASTLE },
     { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
   ],
-}
+};
 
-const SECOND_RANK = { b: RANK_7, w: RANK_2 }
+const SECOND_RANK = { b: RANK_7, w: RANK_2 };
 
-const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
+const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*'];
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
-  return square >> 4
+  return square >> 4;
 }
 
 // Extracts the zero-based file of an 0x88 square.
 function file(square: number): number {
-  return square & 0xf
+  return square & 0xf;
 }
 
 function isDigit(c: string): boolean {
-  return '0123456789'.indexOf(c) !== -1
+  return '0123456789'.indexOf(c) !== -1;
 }
 
 // Converts a 0x88 square to algebraic notation.
 function algebraic(square: number): Square {
-  const f = file(square)
-  const r = rank(square)
+  const f = file(square);
+  const r = rank(square);
   return ('abcdefgh'.substring(f, f + 1) +
-    '87654321'.substring(r, r + 1)) as Square
+    '87654321'.substring(r, r + 1)) as Square;
 }
 
 function swapColor(color: Color): Color {
-  return color === WHITE ? BLACK : WHITE
-}
-
-export function validateFen(fen: string) {
-  // 1st criterion: 6 space-seperated fields?
-  const tokens = fen.split(/\s+/)
-  if (tokens.length !== 6) {
-    return {
-      ok: false,
-      error: 'Invalid FEN: must contain six space-delimited fields',
-    }
-  }
-
-  // 2nd criterion: move number field is a integer value > 0?
-  const moveNumber = parseInt(tokens[5], 10)
-  if (isNaN(moveNumber) || moveNumber <= 0) {
-    return {
-      ok: false,
-      error: 'Invalid FEN: move number must be a positive integer',
-    }
-  }
-
-  // 3rd criterion: half move counter is an integer >= 0?
-  const halfMoves = parseInt(tokens[4], 10)
-  if (isNaN(halfMoves) || halfMoves < 0) {
-    return {
-      ok: false,
-      error:
-        'Invalid FEN: half move counter number must be a non-negative integer',
-    }
-  }
-
-  // 4th criterion: 4th field is a valid e.p.-string?
-  if (!/^(-|[abcdefgh][36])$/.test(tokens[3])) {
-    return { ok: false, error: 'Invalid FEN: en-passant square is invalid' }
-  }
-
-  // 5th criterion: 3th field is a valid castle-string?
-  if (/[^kKqQ-]/.test(tokens[2])) {
-    return { ok: false, error: 'Invalid FEN: castling availability is invalid' }
-  }
-
-  // 6th criterion: 2nd field is "w" (white) or "b" (black)?
-  if (!/^(w|b)$/.test(tokens[1])) {
-    return { ok: false, error: 'Invalid FEN: side-to-move is invalid' }
-  }
-
-  // 7th criterion: 1st field contains 8 rows?
-  const rows = tokens[0].split('/')
-  if (rows.length !== 8) {
-    return {
-      ok: false,
-      error: "Invalid FEN: piece data does not contain 8 '/'-delimited rows",
-    }
-  }
-
-  // 8th criterion: every row is valid?
-  for (let i = 0; i < rows.length; i++) {
-    // check for right sum of fields AND not two numbers in succession
-    let sumFields = 0
-    let previousWasNumber = false
-
-    for (let k = 0; k < rows[i].length; k++) {
-      if (isDigit(rows[i][k])) {
-        if (previousWasNumber) {
-          return {
-            ok: false,
-            error: 'Invalid FEN: piece data is invalid (consecutive number)',
-          }
-        }
-        sumFields += parseInt(rows[i][k], 10)
-        previousWasNumber = true
-      } else {
-        if (!/^[prnbqkPRNBQK]$/.test(rows[i][k])) {
-          return {
-            ok: false,
-            error: 'Invalid FEN: piece data is invalid (invalid piece)',
-          }
-        }
-        sumFields += 1
-        previousWasNumber = false
-      }
-    }
-    if (sumFields !== 8) {
-      return {
-        ok: false,
-        error: 'Invalid FEN: piece data is invalid (too many squares in rank)',
-      }
-    }
-  }
-
-  // 9th criterion: is en-passant square legal?
-  if (
-    (tokens[3][1] == '3' && tokens[1] == 'w') ||
-    (tokens[3][1] == '6' && tokens[1] == 'b')
-  ) {
-    return { ok: false, error: 'Invalid FEN: illegal en-passant square' }
-  }
-
-  // 10th criterion: does chess position contain exact two kings?
-  const kings = [
-    { color: 'white', regex: /K/g },
-    { color: 'black', regex: /k/g },
-  ]
-
-  for (const { color, regex } of kings) {
-    if (!regex.test(tokens[0])) {
-      return { ok: false, error: `Invalid FEN: missing ${color} king` }
-    }
-
-    if ((tokens[0].match(regex) || []).length > 1) {
-      return { ok: false, error: `Invalid FEN: too many ${color} kings` }
-    }
-  }
-
-  // 11th criterion: are any pawns on the first or eighth rows?
-  if (
-    Array.from(rows[0] + rows[7]).some((char) => char.toUpperCase() === 'P')
-  ) {
-    return {
-      ok: false,
-      error: 'Invalid FEN: some pawns are on the edge rows',
-    }
-  }
-
-  return { ok: true }
+  return color === WHITE ? BLACK : WHITE;
 }
 
 // this function is used to uniquely identify ambiguous moves
 function getDisambiguator(move: InternalMove, moves: InternalMove[]) {
-  const from = move.from
-  const to = move.to
-  const piece = move.piece
+  const from = move.from;
+  const to = move.to;
+  const piece = move.piece;
 
-  let ambiguities = 0
-  let sameRank = 0
-  let sameFile = 0
+  let ambiguities = 0;
+  let sameRank = 0;
+  let sameFile = 0;
 
   for (let i = 0, len = moves.length; i < len; i++) {
-    const ambigFrom = moves[i].from
-    const ambigTo = moves[i].to
-    const ambigPiece = moves[i].piece
+    const ambigFrom = moves[i].from;
+    const ambigTo = moves[i].to;
+    const ambigPiece = moves[i].piece;
 
     /*
      * if a move of the same piece type ends on the same to square, we'll need
      * to add a disambiguator to the algebraic notation
      */
     if (piece === ambigPiece && from !== ambigFrom && to === ambigTo) {
-      ambiguities++
+      ambiguities++;
 
       if (rank(from) === rank(ambigFrom)) {
-        sameRank++
+        sameRank++;
       }
 
       if (file(from) === file(ambigFrom)) {
-        sameFile++
+        sameFile++;
       }
     }
   }
@@ -454,20 +556,20 @@ function getDisambiguator(move: InternalMove, moves: InternalMove[]) {
        * if there exists a similar moving piece on the same rank and file as
        * the move in question, use the square as the disambiguator
        */
-      return algebraic(from)
+      return algebraic(from);
     } else if (sameFile > 0) {
       /*
        * if the moving piece rests on the same file, use the rank symbol as the
        * disambiguator
        */
-      return algebraic(from).charAt(1)
+      return algebraic(from).charAt(1);
     } else {
       // else use the file symbol
-      return algebraic(from).charAt(0)
+      return algebraic(from).charAt(0);
     }
   }
 
-  return ''
+  return '';
 }
 
 function addMove(
@@ -479,11 +581,11 @@ function addMove(
   captured: PieceSymbol | undefined = undefined,
   flags: number = BITS.NORMAL
 ) {
-  const r = rank(to)
+  const r = rank(to);
 
   if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
     for (let i = 0; i < PROMOTIONS.length; i++) {
-      const promotion = PROMOTIONS[i]
+      const promotion = PROMOTIONS[i];
       moves.push({
         color,
         from,
@@ -492,7 +594,7 @@ function addMove(
         captured,
         promotion,
         flags: flags | BITS.PROMOTION,
-      })
+      });
     }
   } else {
     moves.push({
@@ -502,60 +604,64 @@ function addMove(
       piece,
       captured,
       flags,
-    })
+    });
   }
 }
 
 function inferPieceType(san: string) {
-  let pieceType = san.charAt(0)
+  let pieceType = san.charAt(0);
   if (pieceType >= 'a' && pieceType <= 'h') {
-    const matches = san.match(/[a-h]\d.*[a-h]\d/)
+    const matches = san.match(/[a-h]\d.*[a-h]\d/);
     if (matches) {
-      return undefined
+      return undefined;
     }
-    return PAWN
+    return PAWN;
   }
-  pieceType = pieceType.toLowerCase()
+  pieceType = pieceType.toLowerCase();
   if (pieceType === 'o') {
-    return KING
+    return KING;
   }
-  return pieceType as PieceSymbol
+  return pieceType as PieceSymbol;
 }
 
 // parses all of the decorators out of a SAN string
 function strippedSan(move: string) {
-  return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
+  return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '');
 }
 
 export class Chess {
-  private _board = new Array<Piece>(128)
-  private _turn: Color = WHITE
-  private _header: Record<string, string> = {}
-  private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
-  private _epSquare = -1
-  private _halfMoves = 0
-  private _moveNumber = 0
-  private _history: History[] = []
-  private _comments: Record<string, string> = {}
-  private _castling: Record<Color, number> = { w: 0, b: 0 }
-  private _positionCounts: Record<string, number> = {}
+  private _board = STARTING_BOARD as Array<Piece>;
+  private _turn: Color = WHITE;
+  private _header: Record<string, string> = {};
+  private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY };
+  private _epSquare = -1;
+  private _halfMoves = 0;
+  private _moveNumber = 0;
+  private _history: History[] = [];
+  private _comments: Record<string, string> = {};
+  private _castling: Record<Color, number> = { w: 0, b: 0 };
+  private _positionCounts: Record<string, number> = {};
 
-  constructor(fen = DEFAULT_POSITION) {
-    this.load(fen)
+  reset() {
+    this._board = STARTING_BOARD as Array<Piece>;
   }
 
+  // constructor(pgn?: string) {
+  //   this.loadPgn(pgn);
+  // }
+
   clear(keepHeaders = false) {
-    this._board = new Array<Piece>(128)
-    this._kings = { w: EMPTY, b: EMPTY }
-    this._turn = WHITE
-    this._castling = { w: 0, b: 0 }
-    this._epSquare = EMPTY
-    this._halfMoves = 0
-    this._moveNumber = 1
-    this._history = []
-    this._comments = {}
-    this._header = keepHeaders ? this._header : {}
-    this._updateSetup(this.fen())
+    this._board = new Array<Piece>(128);
+    this._kings = { w: EMPTY, b: EMPTY };
+    this._turn = WHITE;
+    this._castling = { w: 0, b: 0 };
+    this._epSquare = EMPTY;
+    this._halfMoves = 0;
+    this._moveNumber = 1;
+    this._history = [];
+    this._comments = {};
+    this._header = keepHeaders ? this._header : {};
+    this._updateSetup(this.fen());
     /*
      * Instantiate a proxy that keeps track of position occurrence counts for the purpose
      * of repetition checking. The getter and setter methods automatically handle trimming
@@ -568,150 +674,89 @@ export class Chess {
           ? Object.keys(target).length // length for unit testing
           : target?.[this._trimFen(position)] || 0,
       set: (target, position: string, count: number) => {
-        const trimmedFen = this._trimFen(position)
-        if (count === 0) delete target[trimmedFen]
-        else target[trimmedFen] = count
-        return true
+        const trimmedFen = this._trimFen(position);
+        if (count === 0) delete target[trimmedFen];
+        else target[trimmedFen] = count;
+        return true;
       },
-    })
+    });
   }
 
   private _trimFen(fen: string): string {
     // remove last two fields in FEN string as they're not needed when checking for repetition
-    return fen.split(' ').slice(0, 4).join(' ')
+    return fen.split(' ').slice(0, 4).join(' ');
   }
 
   removeHeader(key: string) {
     if (key in this._header) {
-      delete this._header[key]
+      delete this._header[key];
     }
-  }
-
-  load(fen: string, keepHeaders = false) {
-    let tokens = fen.split(/\s+/)
-
-    // append commonly omitted fen tokens
-    if (tokens.length >= 2 && tokens.length < 6) {
-      const adjustments = ['-', '-', '0', '1']
-      fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ')
-    }
-
-    tokens = fen.split(/\s+/)
-
-    const { ok, error } = validateFen(fen)
-    if (!ok) {
-      throw new Error(error)
-    }
-
-    const position = tokens[0]
-    let square = 0
-
-    this.clear(keepHeaders)
-
-    for (let i = 0; i < position.length; i++) {
-      const piece = position.charAt(i)
-
-      if (piece === '/') {
-        square += 8
-      } else if (isDigit(piece)) {
-        square += parseInt(piece, 10)
-      } else {
-        const color = piece < 'a' ? WHITE : BLACK
-        this._put(
-          { type: piece.toLowerCase() as PieceSymbol, color },
-          algebraic(square)
-        )
-        square++
-      }
-    }
-
-    this._turn = tokens[1] as Color
-
-    if (tokens[2].indexOf('K') > -1) {
-      this._castling.w |= BITS.KSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('Q') > -1) {
-      this._castling.w |= BITS.QSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('k') > -1) {
-      this._castling.b |= BITS.KSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('q') > -1) {
-      this._castling.b |= BITS.QSIDE_CASTLE
-    }
-
-    this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
-    this._halfMoves = parseInt(tokens[4], 10)
-    this._moveNumber = parseInt(tokens[5], 10)
-
-    this._updateSetup(this.fen())
-    this._positionCounts[fen]++
   }
 
   fen() {
-    let empty = 0
-    let fen = ''
+    let empty = 0;
+    let fen = '';
 
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       if (this._board[i]) {
         if (empty > 0) {
-          fen += empty
-          empty = 0
+          fen += empty;
+          empty = 0;
         }
-        const { color, type: piece } = this._board[i]
+        const { color, type: piece } = this._board[i];
 
-        fen += color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
+        fen += color === WHITE ? piece.toUpperCase() : piece.toLowerCase();
       } else {
-        empty++
+        empty++;
       }
 
       if ((i + 1) & 0x88) {
         if (empty > 0) {
-          fen += empty
+          fen += empty;
         }
 
         if (i !== Ox88.h1) {
-          fen += '/'
+          fen += '/';
         }
 
-        empty = 0
-        i += 8
+        empty = 0;
+        i += 8;
       }
     }
 
-    let castling = ''
+    let castling = '';
     if (this._castling[WHITE] & BITS.KSIDE_CASTLE) {
-      castling += 'K'
+      castling += 'K';
     }
     if (this._castling[WHITE] & BITS.QSIDE_CASTLE) {
-      castling += 'Q'
+      castling += 'Q';
     }
     if (this._castling[BLACK] & BITS.KSIDE_CASTLE) {
-      castling += 'k'
+      castling += 'k';
     }
     if (this._castling[BLACK] & BITS.QSIDE_CASTLE) {
-      castling += 'q'
+      castling += 'q';
     }
 
     // do we have an empty castling flag?
-    castling = castling || '-'
+    castling = castling || '-';
 
-    let epSquare = '-'
+    let epSquare = '-';
     /*
      * only print the ep square if en passant is a valid move (pawn is present
      * and ep capture is not pinned)
      */
     if (this._epSquare !== EMPTY) {
-      const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
-      const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
+      const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16);
+      const squares = [bigPawnSquare + 1, bigPawnSquare - 1];
 
       for (const square of squares) {
         // is the square off the board?
         if (square & 0x88) {
-          continue
+          continue;
         }
 
-        const color = this._turn
+        const color = this._turn;
 
         // is there a pawn that can capture the epSquare?
         if (
@@ -726,14 +771,14 @@ export class Chess {
             piece: PAWN,
             captured: PAWN,
             flags: BITS.EP_CAPTURE,
-          })
-          const isLegal = !this._isKingAttacked(color)
-          this._undoMove()
+          });
+          const isLegal = !this._isKingAttacked(color);
+          this._undoMove();
 
           // if ep is legal, break and set the ep square in the FEN output
           if (isLegal) {
-            epSquare = algebraic(this._epSquare)
-            break
+            epSquare = algebraic(this._epSquare);
+            break;
           }
         }
       }
@@ -746,7 +791,7 @@ export class Chess {
       epSquare,
       this._halfMoves,
       this._moveNumber,
-    ].join(' ')
+    ].join(' ');
   }
 
   /*
@@ -756,112 +801,131 @@ export class Chess {
    * is only updated if history.length is zero, ie moves haven't been made.
    */
   private _updateSetup(fen: string) {
-    if (this._history.length > 0) return
+    if (this._history.length > 0) return;
 
     if (fen !== DEFAULT_POSITION) {
-      this._header['SetUp'] = '1'
-      this._header['FEN'] = fen
+      this._header['SetUp'] = '1';
+      this._header['FEN'] = fen;
     } else {
-      delete this._header['SetUp']
-      delete this._header['FEN']
+      delete this._header['SetUp'];
+      delete this._header['FEN'];
     }
   }
 
-  reset() {
-    this.load(DEFAULT_POSITION)
-  }
-
   get(square: Square) {
-    return this._board[Ox88[square]] || false
+    return this._board[Ox88[square]] || false;
   }
 
   put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
     if (this._put({ type, color }, square)) {
-      this._updateCastlingRights()
-      this._updateEnPassantSquare()
-      this._updateSetup(this.fen())
-      return true
-    } 
-    return false
+      this._updateCastlingRights();
+      this._updateEnPassantSquare();
+      this._updateSetup(this.fen());
+      return true;
+    }
+    return false;
   }
 
-  private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+  private _put(
+    { type, color }: { type: PieceSymbol; color: Color },
+    square: Square
+  ) {
     // check for piece
     if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
-      return false
+      return false;
     }
 
     // check for valid square
     if (!(square in Ox88)) {
-      return false
+      return false;
     }
 
-    const sq = Ox88[square]
+    const sq = Ox88[square];
 
     // don't let the user place more than one king
     if (
       type == KING &&
       !(this._kings[color] == EMPTY || this._kings[color] == sq)
     ) {
-      return false
+      return false;
     }
 
-    this._board[sq] = { type: type as PieceSymbol, color: color as Color }
+    this._board[sq] = { type: type as PieceSymbol, color: color as Color };
 
     if (type === KING) {
-      this._kings[color] = sq
+      this._kings[color] = sq;
     }
 
-    this._updateCastlingRights()
-    this._updateEnPassantSquare()
-    this._updateSetup(this.fen())
+    this._updateCastlingRights();
+    this._updateEnPassantSquare();
+    this._updateSetup(this.fen());
 
-    return true
+    return true;
   }
 
   remove(square: Square) {
-    const piece = this.get(square)
-    delete this._board[Ox88[square]]
+    const piece = this.get(square);
+    delete this._board[Ox88[square]];
     if (piece && piece.type === KING) {
-      this._kings[piece.color] = EMPTY
+      this._kings[piece.color] = EMPTY;
     }
 
-    this._updateCastlingRights()
-    this._updateEnPassantSquare()
-    this._updateSetup(this.fen())
+    this._updateCastlingRights();
+    this._updateEnPassantSquare();
+    this._updateSetup(this.fen());
 
-    return piece
+    return piece;
   }
 
   _updateCastlingRights() {
-    const whiteKingInPlace = (this._board[Ox88.e1]?.type === KING && this._board[Ox88.e1]?.color === WHITE)
-    const blackKingInPlace = (this._board[Ox88.e8]?.type === KING && this._board[Ox88.e8]?.color === BLACK)
+    const whiteKingInPlace =
+      this._board[Ox88.e1]?.type === KING &&
+      this._board[Ox88.e1]?.color === WHITE;
+    const blackKingInPlace =
+      this._board[Ox88.e8]?.type === KING &&
+      this._board[Ox88.e8]?.color === BLACK;
 
-    if (!whiteKingInPlace || this._board[Ox88.a1]?.type !== ROOK || this._board[Ox88.a1]?.color !== WHITE) {
-      this._castling.w &= ~BITS.QSIDE_CASTLE
+    if (
+      !whiteKingInPlace ||
+      this._board[Ox88.a1]?.type !== ROOK ||
+      this._board[Ox88.a1]?.color !== WHITE
+    ) {
+      this._castling.w &= ~BITS.QSIDE_CASTLE;
     }
 
-    if (!whiteKingInPlace || this._board[Ox88.h1]?.type !== ROOK || this._board[Ox88.h1]?.color !== WHITE) {
-      this._castling.w &= ~BITS.KSIDE_CASTLE
+    if (
+      !whiteKingInPlace ||
+      this._board[Ox88.h1]?.type !== ROOK ||
+      this._board[Ox88.h1]?.color !== WHITE
+    ) {
+      this._castling.w &= ~BITS.KSIDE_CASTLE;
     }
 
-    if (!blackKingInPlace || this._board[Ox88.a8]?.type !== ROOK || this._board[Ox88.a8]?.color !== BLACK) {
-      this._castling.b &= ~BITS.QSIDE_CASTLE
+    if (
+      !blackKingInPlace ||
+      this._board[Ox88.a8]?.type !== ROOK ||
+      this._board[Ox88.a8]?.color !== BLACK
+    ) {
+      this._castling.b &= ~BITS.QSIDE_CASTLE;
     }
 
-    if (!blackKingInPlace || this._board[Ox88.h8]?.type !== ROOK || this._board[Ox88.h8]?.color !== BLACK) {
-      this._castling.b &= ~BITS.KSIDE_CASTLE
+    if (
+      !blackKingInPlace ||
+      this._board[Ox88.h8]?.type !== ROOK ||
+      this._board[Ox88.h8]?.color !== BLACK
+    ) {
+      this._castling.b &= ~BITS.KSIDE_CASTLE;
     }
   }
 
   _updateEnPassantSquare() {
-    if(this._epSquare === EMPTY) {
-      return
+    if (this._epSquare === EMPTY) {
+      return;
     }
 
-    const startSquare = this._epSquare + (this._turn === WHITE ? -16 : 16)
-    const currentSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
-    const attackers = [currentSquare + 1, currentSquare - 1]
+    const startSquare = this._epSquare + (this._turn === WHITE ? -16 : 16);
+    const currentSquare = this._epSquare + (this._turn === WHITE ? 16 : -16);
+    const attackers = [currentSquare + 1, currentSquare - 1];
 
     if (
       this._board[startSquare] !== null ||
@@ -869,8 +933,8 @@ export class Chess {
       this._board[currentSquare]?.color !== swapColor(this._turn) ||
       this._board[currentSquare]?.type !== PAWN
     ) {
-      this._epSquare = EMPTY
-      return
+      this._epSquare = EMPTY;
+      return;
     }
 
     const canCapture = (square: number) =>
@@ -878,8 +942,8 @@ export class Chess {
       this._board[square]?.color === this._turn &&
       this._board[square]?.type === PAWN;
 
-    if(!attackers.some(canCapture)) {
-      this._epSquare = EMPTY
+    if (!attackers.some(canCapture)) {
+      this._epSquare = EMPTY;
     }
   }
 
@@ -887,80 +951,80 @@ export class Chess {
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // did we run off the end of the board
       if (i & 0x88) {
-        i += 7
-        continue
+        i += 7;
+        continue;
       }
 
       // if empty square or wrong color
       if (this._board[i] === undefined || this._board[i].color !== color) {
-        continue
+        continue;
       }
 
-      const piece = this._board[i]
-      const difference = i - square
+      const piece = this._board[i];
+      const difference = i - square;
 
       // skip - to/from square are the same
       if (difference === 0) {
-        continue
+        continue;
       }
 
-      const index = difference + 119
+      const index = difference + 119;
 
       if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
         if (piece.type === PAWN) {
           if (difference > 0) {
-            if (piece.color === WHITE) return true
+            if (piece.color === WHITE) return true;
           } else {
-            if (piece.color === BLACK) return true
+            if (piece.color === BLACK) return true;
           }
-          continue
+          continue;
         }
 
         // if the piece is a knight or a king
-        if (piece.type === 'n' || piece.type === 'k') return true
+        if (piece.type === 'n' || piece.type === 'k') return true;
 
-        const offset = RAYS[index]
-        let j = i + offset
+        const offset = RAYS[index];
+        let j = i + offset;
 
-        let blocked = false
+        let blocked = false;
         while (j !== square) {
           if (this._board[j] != null) {
-            blocked = true
-            break
+            blocked = true;
+            break;
           }
-          j += offset
+          j += offset;
         }
 
-        if (!blocked) return true
+        if (!blocked) return true;
       }
     }
 
-    return false
+    return false;
   }
 
   private _isKingAttacked(color: Color) {
-    const square = this._kings[color]
-    return square === -1 ? false : this._attacked(swapColor(color), square)
+    const square = this._kings[color];
+    return square === -1 ? false : this._attacked(swapColor(color), square);
   }
 
   isAttacked(square: Square, attackedBy: Color) {
-    return this._attacked(attackedBy, Ox88[square])
+    return this._attacked(attackedBy, Ox88[square]);
   }
 
   isCheck() {
-    return this._isKingAttacked(this._turn)
+    return this._isKingAttacked(this._turn);
   }
 
   inCheck() {
-    return this.isCheck()
+    return this.isCheck();
   }
 
   isCheckmate() {
-    return this.isCheck() && this._moves().length === 0
+    return this.isCheck() && this._moves().length === 0;
   }
 
   isStalemate() {
-    return !this.isCheck() && this._moves().length === 0
+    return !this.isCheck() && this._moves().length === 0;
   }
 
   isInsufficientMaterial() {
@@ -978,58 +1042,58 @@ export class Chess {
       q: 0,
       k: 0,
       p: 0,
-    }
-    const bishops = []
-    let numPieces = 0
-    let squareColor = 0
+    };
+    const bishops = [];
+    let numPieces = 0;
+    let squareColor = 0;
 
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      squareColor = (squareColor + 1) % 2
+      squareColor = (squareColor + 1) % 2;
       if (i & 0x88) {
-        i += 7
-        continue
+        i += 7;
+        continue;
       }
 
-      const piece = this._board[i]
+      const piece = this._board[i];
       if (piece) {
-        pieces[piece.type] = piece.type in pieces ? pieces[piece.type] + 1 : 1
+        pieces[piece.type] = piece.type in pieces ? pieces[piece.type] + 1 : 1;
         if (piece.type === BISHOP) {
-          bishops.push(squareColor)
+          bishops.push(squareColor);
         }
-        numPieces++
+        numPieces++;
       }
     }
 
     // k vs. k
     if (numPieces === 2) {
-      return true
+      return true;
     } else if (
       // k vs. kn .... or .... k vs. kb
       numPieces === 3 &&
       (pieces[BISHOP] === 1 || pieces[KNIGHT] === 1)
     ) {
-      return true
+      return true;
     } else if (numPieces === pieces[BISHOP] + 2) {
       // kb vs. kb where any number of bishops are all on the same color
-      let sum = 0
-      const len = bishops.length
+      let sum = 0;
+      const len = bishops.length;
       for (let i = 0; i < len; i++) {
-        sum += bishops[i]
+        sum += bishops[i];
       }
       if (sum === 0 || sum === len) {
-        return true
+        return true;
       }
     }
 
-    return false
+    return false;
   }
 
   private _getRepetitionCount() {
-    return this._positionCounts[this.fen()]
+    return this._positionCounts[this.fen()];
   }
 
   isThreefoldRepetition(): boolean {
-    return this._getRepetitionCount() >= 3
+    return this._getRepetitionCount() >= 3;
   }
 
   isDraw() {
@@ -1038,80 +1102,80 @@ export class Chess {
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
       this.isThreefoldRepetition()
-    )
+    );
   }
 
   isGameOver() {
-    return this.isCheckmate() || this.isStalemate() || this.isDraw()
+    return this.isCheckmate() || this.isStalemate() || this.isDraw();
   }
 
-  moves(): string[]
-  moves({ square }: { square: Square }): string[]
-  moves({ piece }: { piece: PieceSymbol }): string[]
+  moves(): string[];
+  moves({ square }: { square: Square }): string[];
+  moves({ piece }: { piece: PieceSymbol }): string[];
 
-  moves({ square, piece }: { square: Square; piece: PieceSymbol }): string[]
+  moves({ square, piece }: { square: Square; piece: PieceSymbol }): string[];
 
-  moves({ verbose, square }: { verbose: true; square?: Square }): Move[]
-  moves({ verbose, square }: { verbose: false; square?: Square }): string[]
+  moves({ verbose, square }: { verbose: true; square?: Square }): Move[];
+  moves({ verbose, square }: { verbose: false; square?: Square }): string[];
   moves({
     verbose,
     square,
   }: {
-    verbose?: boolean
-    square?: Square
-  }): string[] | Move[]
+    verbose?: boolean;
+    square?: Square;
+  }): string[] | Move[];
 
-  moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[]
-  moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[]
+  moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[];
+  moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[];
   moves({
     verbose,
     piece,
   }: {
-    verbose?: boolean
-    piece?: PieceSymbol
-  }): string[] | Move[]
+    verbose?: boolean;
+    piece?: PieceSymbol;
+  }): string[] | Move[];
 
-  moves({
-    verbose,
-    square,
-    piece,
-  }: {
-    verbose: true
-    square?: Square
-    piece?: PieceSymbol
-  }): Move[]
   moves({
     verbose,
     square,
     piece,
   }: {
-    verbose: false
-    square?: Square
-    piece?: PieceSymbol
-  }): string[]
+    verbose: true;
+    square?: Square;
+    piece?: PieceSymbol;
+  }): Move[];
   moves({
     verbose,
     square,
     piece,
   }: {
-    verbose?: boolean
-    square?: Square
-    piece?: PieceSymbol
-  }): string[] | Move[]
+    verbose: false;
+    square?: Square;
+    piece?: PieceSymbol;
+  }): string[];
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose?: boolean;
+    square?: Square;
+    piece?: PieceSymbol;
+  }): string[] | Move[];
 
-  moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[]
+  moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[];
 
   moves({
     verbose = false,
     square = undefined,
     piece = undefined,
   }: { verbose?: boolean; square?: Square; piece?: PieceSymbol } = {}) {
-    const moves = this._moves({ square, piece })
+    const moves = this._moves({ square, piece });
 
     if (verbose) {
-      return moves.map((move) => this._makePretty(move))
+      return moves.map((move) => this._makePretty(move));
     } else {
-      return moves.map((move) => this._moveToSan(move, moves))
+      return moves.map((move) => this._moveToSan(move, moves));
     }
   }
 
@@ -1120,65 +1184,65 @@ export class Chess {
     piece = undefined,
     square = undefined,
   }: {
-    legal?: boolean
-    piece?: PieceSymbol
-    square?: Square
+    legal?: boolean;
+    piece?: PieceSymbol;
+    square?: Square;
   } = {}) {
-    const forSquare = square ? (square.toLowerCase() as Square) : undefined
-    const forPiece = piece?.toLowerCase()
+    const forSquare = square ? (square.toLowerCase() as Square) : undefined;
+    const forPiece = piece?.toLowerCase();
 
-    const moves: InternalMove[] = []
-    const us = this._turn
-    const them = swapColor(us)
+    const moves: InternalMove[] = [];
+    const us = this._turn;
+    const them = swapColor(us);
 
-    let firstSquare = Ox88.a8
-    let lastSquare = Ox88.h1
-    let singleSquare = false
+    let firstSquare = Ox88.a8;
+    let lastSquare = Ox88.h1;
+    let singleSquare = false;
 
     // are we generating moves for a single square?
     if (forSquare) {
       // illegal square, return empty moves
       if (!(forSquare in Ox88)) {
-        return []
+        return [];
       } else {
-        firstSquare = lastSquare = Ox88[forSquare]
-        singleSquare = true
+        firstSquare = lastSquare = Ox88[forSquare];
+        singleSquare = true;
       }
     }
 
     for (let from = firstSquare; from <= lastSquare; from++) {
       // did we run off the end of the board
       if (from & 0x88) {
-        from += 7
-        continue
+        from += 7;
+        continue;
       }
 
       // empty square or opponent, skip
       if (!this._board[from] || this._board[from].color === them) {
-        continue
+        continue;
       }
-      const { type } = this._board[from]
+      const { type } = this._board[from];
 
-      let to: number
+      let to: number;
       if (type === PAWN) {
-        if (forPiece && forPiece !== type) continue
+        if (forPiece && forPiece !== type) continue;
 
         // single square, non-capturing
-        to = from + PAWN_OFFSETS[us][0]
+        to = from + PAWN_OFFSETS[us][0];
         if (!this._board[to]) {
-          addMove(moves, us, from, to, PAWN)
+          addMove(moves, us, from, to, PAWN);
 
           // double square
-          to = from + PAWN_OFFSETS[us][1]
+          to = from + PAWN_OFFSETS[us][1];
           if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-            addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
+            addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN);
           }
         }
 
         // pawn captures
         for (let j = 2; j < 4; j++) {
-          to = from + PAWN_OFFSETS[us][j]
-          if (to & 0x88) continue
+          to = from + PAWN_OFFSETS[us][j];
+          if (to & 0x88) continue;
 
           if (this._board[to]?.color === them) {
             addMove(
@@ -1189,27 +1253,27 @@ export class Chess {
               PAWN,
               this._board[to].type,
               BITS.CAPTURE
-            )
+            );
           } else if (to === this._epSquare) {
-            addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
+            addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE);
           }
         }
       } else {
-        if (forPiece && forPiece !== type) continue
+        if (forPiece && forPiece !== type) continue;
 
         for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
-          const offset = PIECE_OFFSETS[type][j]
-          to = from
+          const offset = PIECE_OFFSETS[type][j];
+          to = from;
 
           while (true) {
-            to += offset
-            if (to & 0x88) break
+            to += offset;
+            if (to & 0x88) break;
 
             if (!this._board[to]) {
-              addMove(moves, us, from, to, type)
+              addMove(moves, us, from, to, type);
             } else {
               // own color, stop loop
-              if (this._board[to].color === us) break
+              if (this._board[to].color === us) break;
 
               addMove(
                 moves,
@@ -1219,12 +1283,12 @@ export class Chess {
                 type,
                 this._board[to].type,
                 BITS.CAPTURE
-              )
-              break
+              );
+              break;
             }
 
             /* break, if knight or king */
-            if (type === KNIGHT || type === KING) break
+            if (type === KNIGHT || type === KING) break;
           }
         }
       }
@@ -1240,8 +1304,8 @@ export class Chess {
       if (!singleSquare || lastSquare === this._kings[us]) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
-          const castlingTo = castlingFrom + 2
+          const castlingFrom = this._kings[us];
+          const castlingTo = castlingFrom + 2;
 
           if (
             !this._board[castlingFrom + 1] &&
@@ -1258,14 +1322,14 @@ export class Chess {
               KING,
               undefined,
               BITS.KSIDE_CASTLE
-            )
+            );
           }
         }
 
         // queen-side castling
         if (this._castling[us] & BITS.QSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
-          const castlingTo = castlingFrom - 2
+          const castlingFrom = this._kings[us];
+          const castlingTo = castlingFrom - 2;
 
           if (
             !this._board[castlingFrom - 1] &&
@@ -1283,7 +1347,7 @@ export class Chess {
               KING,
               undefined,
               BITS.QSIDE_CASTLE
-            )
+            );
           }
         }
       }
@@ -1294,21 +1358,21 @@ export class Chess {
      * to be captured)
      */
     if (!legal || this._kings[us] === -1) {
-      return moves
+      return moves;
     }
 
     // filter out illegal moves
-    const legalMoves = []
+    const legalMoves = [];
 
     for (let i = 0, len = moves.length; i < len; i++) {
-      this._makeMove(moves[i])
+      this._makeMove(moves[i]);
       if (!this._isKingAttacked(us)) {
-        legalMoves.push(moves[i])
+        legalMoves.push(moves[i]);
       }
-      this._undoMove()
+      this._undoMove();
     }
 
-    return legalMoves
+    return legalMoves;
   }
 
   move(
@@ -1329,12 +1393,12 @@ export class Chess {
      * strictly follow the SAN specification.
      */
 
-    let moveObj = null
+    let moveObj = null;
 
     if (typeof move === 'string') {
-      moveObj = this._moveFromSan(move, strict)
+      moveObj = this._moveFromSan(move, strict);
     } else if (typeof move === 'object') {
-      const moves = this._moves()
+      const moves = this._moves();
 
       // convert the pretty move object to an ugly move object
       for (let i = 0, len = moves.length; i < len; i++) {
@@ -1343,8 +1407,8 @@ export class Chess {
           move.to === algebraic(moves[i].to) &&
           (!('promotion' in moves[i]) || move.promotion === moves[i].promotion)
         ) {
-          moveObj = moves[i]
-          break
+          moveObj = moves[i];
+          break;
         }
       }
     }
@@ -1352,9 +1416,9 @@ export class Chess {
     // failed to find move
     if (!moveObj) {
       if (typeof move === 'string') {
-        throw new Error(`Invalid move: ${move}`)
+        throw new Error(`Invalid move: ${move}`);
       } else {
-        throw new Error(`Invalid move: ${JSON.stringify(move)}`)
+        throw new Error(`Invalid move: ${JSON.stringify(move)}`);
       }
     }
 
@@ -1362,11 +1426,11 @@ export class Chess {
      * need to make a copy of move because we can't generate SAN after the move
      * is made
      */
-    const prettyMove = this._makePretty(moveObj)
+    const prettyMove = this._makePretty(moveObj);
 
-    this._makeMove(moveObj)
-    this._positionCounts[prettyMove.after]++
-    return prettyMove
+    this._makeMove(moveObj);
+    this._positionCounts[prettyMove.after]++;
+    return prettyMove;
   }
 
   _push(move: InternalMove) {
@@ -1378,50 +1442,50 @@ export class Chess {
       epSquare: this._epSquare,
       halfMoves: this._halfMoves,
       moveNumber: this._moveNumber,
-    })
+    });
   }
 
   private _makeMove(move: InternalMove) {
-    const us = this._turn
-    const them = swapColor(us)
-    this._push(move)
+    const us = this._turn;
+    const them = swapColor(us);
+    this._push(move);
 
-    this._board[move.to] = this._board[move.from]
-    delete this._board[move.from]
+    this._board[move.to] = this._board[move.from];
+    delete this._board[move.from];
 
     // if ep capture, remove the captured pawn
     if (move.flags & BITS.EP_CAPTURE) {
       if (this._turn === BLACK) {
-        delete this._board[move.to - 16]
+        delete this._board[move.to - 16];
       } else {
-        delete this._board[move.to + 16]
+        delete this._board[move.to + 16];
       }
     }
 
     // if pawn promotion, replace with new piece
     if (move.promotion) {
-      this._board[move.to] = { type: move.promotion, color: us }
+      this._board[move.to] = { type: move.promotion, color: us };
     }
 
     // if we moved the king
     if (this._board[move.to].type === KING) {
-      this._kings[us] = move.to
+      this._kings[us] = move.to;
 
       // if we castled, move the rook next to the king
       if (move.flags & BITS.KSIDE_CASTLE) {
-        const castlingTo = move.to - 1
-        const castlingFrom = move.to + 1
-        this._board[castlingTo] = this._board[castlingFrom]
-        delete this._board[castlingFrom]
+        const castlingTo = move.to - 1;
+        const castlingFrom = move.to + 1;
+        this._board[castlingTo] = this._board[castlingFrom];
+        delete this._board[castlingFrom];
       } else if (move.flags & BITS.QSIDE_CASTLE) {
-        const castlingTo = move.to + 1
-        const castlingFrom = move.to - 2
-        this._board[castlingTo] = this._board[castlingFrom]
-        delete this._board[castlingFrom]
+        const castlingTo = move.to + 1;
+        const castlingFrom = move.to - 2;
+        this._board[castlingTo] = this._board[castlingFrom];
+        delete this._board[castlingFrom];
       }
 
       // turn off castling
-      this._castling[us] = 0
+      this._castling[us] = 0;
     }
 
     // turn off castling if we move a rook
@@ -1431,8 +1495,8 @@ export class Chess {
           move.from === ROOKS[us][i].square &&
           this._castling[us] & ROOKS[us][i].flag
         ) {
-          this._castling[us] ^= ROOKS[us][i].flag
-          break
+          this._castling[us] ^= ROOKS[us][i].flag;
+          break;
         }
       }
     }
@@ -1444,8 +1508,8 @@ export class Chess {
           move.to === ROOKS[them][i].square &&
           this._castling[them] & ROOKS[them][i].flag
         ) {
-          this._castling[them] ^= ROOKS[them][i].flag
-          break
+          this._castling[them] ^= ROOKS[them][i].flag;
+          break;
         }
       }
     }
@@ -1453,93 +1517,93 @@ export class Chess {
     // if big pawn move, update the en passant square
     if (move.flags & BITS.BIG_PAWN) {
       if (us === BLACK) {
-        this._epSquare = move.to - 16
+        this._epSquare = move.to - 16;
       } else {
-        this._epSquare = move.to + 16
+        this._epSquare = move.to + 16;
       }
     } else {
-      this._epSquare = EMPTY
+      this._epSquare = EMPTY;
     }
 
     // reset the 50 move counter if a pawn is moved or a piece is captured
     if (move.piece === PAWN) {
-      this._halfMoves = 0
+      this._halfMoves = 0;
     } else if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
-      this._halfMoves = 0
+      this._halfMoves = 0;
     } else {
-      this._halfMoves++
+      this._halfMoves++;
     }
 
     if (us === BLACK) {
-      this._moveNumber++
+      this._moveNumber++;
     }
 
-    this._turn = them
+    this._turn = them;
   }
 
   undo() {
-    const move = this._undoMove()
+    const move = this._undoMove();
     if (move) {
-      const prettyMove = this._makePretty(move)
-      this._positionCounts[prettyMove.after]--
-      return prettyMove
-    }    
-    return null
+      const prettyMove = this._makePretty(move);
+      this._positionCounts[prettyMove.after]--;
+      return prettyMove;
+    }
+    return null;
   }
 
   private _undoMove() {
-    const old = this._history.pop()
+    const old = this._history.pop();
     if (old === undefined) {
-      return null
+      return null;
     }
 
-    const move = old.move
+    const move = old.move;
 
-    this._kings = old.kings
-    this._turn = old.turn
-    this._castling = old.castling
-    this._epSquare = old.epSquare
-    this._halfMoves = old.halfMoves
-    this._moveNumber = old.moveNumber
+    this._kings = old.kings;
+    this._turn = old.turn;
+    this._castling = old.castling;
+    this._epSquare = old.epSquare;
+    this._halfMoves = old.halfMoves;
+    this._moveNumber = old.moveNumber;
 
-    const us = this._turn
-    const them = swapColor(us)
+    const us = this._turn;
+    const them = swapColor(us);
 
-    this._board[move.from] = this._board[move.to]
-    this._board[move.from].type = move.piece // to undo any promotions
-    delete this._board[move.to]
+    this._board[move.from] = this._board[move.to];
+    this._board[move.from].type = move.piece; // to undo any promotions
+    delete this._board[move.to];
 
     if (move.captured) {
       if (move.flags & BITS.EP_CAPTURE) {
         // en passant capture
-        let index: number
+        let index: number;
         if (us === BLACK) {
-          index = move.to - 16
+          index = move.to - 16;
         } else {
-          index = move.to + 16
+          index = move.to + 16;
         }
-        this._board[index] = { type: PAWN, color: them }
+        this._board[index] = { type: PAWN, color: them };
       } else {
         // regular capture
-        this._board[move.to] = { type: move.captured, color: them }
+        this._board[move.to] = { type: move.captured, color: them };
       }
     }
 
     if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-      let castlingTo: number, castlingFrom: number
+      let castlingTo: number, castlingFrom: number;
       if (move.flags & BITS.KSIDE_CASTLE) {
-        castlingTo = move.to + 1
-        castlingFrom = move.to - 1
+        castlingTo = move.to + 1;
+        castlingFrom = move.to - 1;
       } else {
-        castlingTo = move.to - 2
-        castlingFrom = move.to + 1
+        castlingTo = move.to - 2;
+        castlingFrom = move.to + 1;
       }
 
-      this._board[castlingTo] = this._board[castlingFrom]
-      delete this._board[castlingFrom]
+      this._board[castlingTo] = this._board[castlingFrom];
+      delete this._board[castlingFrom];
     }
 
-    return move
+    return move;
   }
 
   pgn({
@@ -1551,8 +1615,8 @@ export class Chess {
      * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
      */
 
-    const result: string[] = []
-    let headerExists = false
+    const result: string[] = [];
+    let headerExists = false;
 
     /* add the PGN header information */
     for (const i in this._header) {
@@ -1560,73 +1624,73 @@ export class Chess {
        * TODO: order of enumerated properties in header object is not
        * guaranteed, see ECMA-262 spec (section 12.6.4)
        */
-      result.push('[' + i + ' "' + this._header[i] + '"]' + newline)
-      headerExists = true
+      result.push('[' + i + ' "' + this._header[i] + '"]' + newline);
+      headerExists = true;
     }
 
     if (headerExists && this._history.length) {
-      result.push(newline)
+      result.push(newline);
     }
 
     const appendComment = (moveString: string) => {
-      const comment = this._comments[this.fen()]
+      const comment = this._comments[this.fen()];
       if (typeof comment !== 'undefined') {
-        const delimiter = moveString.length > 0 ? ' ' : ''
-        moveString = `${moveString}${delimiter}{${comment}}`
+        const delimiter = moveString.length > 0 ? ' ' : '';
+        moveString = `${moveString}${delimiter}{${comment}}`;
       }
-      return moveString
-    }
+      return moveString;
+    };
 
     // pop all of history onto reversed_history
-    const reversedHistory = []
+    const reversedHistory = [];
     while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+      reversedHistory.push(this._undoMove());
     }
 
-    const moves = []
-    let moveString = ''
+    const moves = [];
+    let moveString = '';
 
     // special case of a commented starting position with no moves
     if (reversedHistory.length === 0) {
-      moves.push(appendComment(''))
+      moves.push(appendComment(''));
     }
 
     // build the list of moves.  a move_string looks like: "3. e3 e6"
     while (reversedHistory.length > 0) {
-      moveString = appendComment(moveString)
-      const move = reversedHistory.pop()
+      moveString = appendComment(moveString);
+      const move = reversedHistory.pop();
 
       // make TypeScript stop complaining about move being undefined
       if (!move) {
-        break
+        break;
       }
 
       // if the position started with black to move, start PGN with #. ...
       if (!this._history.length && move.color === 'b') {
-        const prefix = `${this._moveNumber}. ...`
+        const prefix = `${this._moveNumber}. ...`;
         // is there a comment preceding the first move?
-        moveString = moveString ? `${moveString} ${prefix}` : prefix
+        moveString = moveString ? `${moveString} ${prefix}` : prefix;
       } else if (move.color === 'w') {
         // store the previous generated move_string if we have one
         if (moveString.length) {
-          moves.push(moveString)
+          moves.push(moveString);
         }
-        moveString = this._moveNumber + '.'
+        moveString = this._moveNumber + '.';
       }
 
       moveString =
-        moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }))
-      this._makeMove(move)
+        moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }));
+      this._makeMove(move);
     }
 
     // are there any other leftover moves?
     if (moveString.length) {
-      moves.push(appendComment(moveString))
+      moves.push(appendComment(moveString));
     }
 
     // is there a result?
     if (typeof this._header.Result !== 'undefined') {
-      moves.push(this._header.Result)
+      moves.push(this._header.Result);
     }
 
     /*
@@ -1634,78 +1698,78 @@ export class Chess {
      * so join together moves
      */
     if (maxWidth === 0) {
-      return result.join('') + moves.join(' ')
+      return result.join('') + moves.join(' ');
     }
 
     // TODO (jah): huh?
     const strip = function () {
       if (result.length > 0 && result[result.length - 1] === ' ') {
-        result.pop()
-        return true
+        result.pop();
+        return true;
       }
-      return false
-    }
+      return false;
+    };
 
     // NB: this does not preserve comment whitespace.
     const wrapComment = function (width: number, move: string) {
       for (const token of move.split(' ')) {
         if (!token) {
-          continue
+          continue;
         }
         if (width + token.length > maxWidth) {
           while (strip()) {
-            width--
+            width--;
           }
-          result.push(newline)
-          width = 0
+          result.push(newline);
+          width = 0;
         }
-        result.push(token)
-        width += token.length
-        result.push(' ')
-        width++
+        result.push(token);
+        width += token.length;
+        result.push(' ');
+        width++;
       }
       if (strip()) {
-        width--
+        width--;
       }
-      return width
-    }
+      return width;
+    };
 
     // wrap the PGN output at max_width
-    let currentWidth = 0
+    let currentWidth = 0;
     for (let i = 0; i < moves.length; i++) {
       if (currentWidth + moves[i].length > maxWidth) {
         if (moves[i].includes('{')) {
-          currentWidth = wrapComment(currentWidth, moves[i])
-          continue
+          currentWidth = wrapComment(currentWidth, moves[i]);
+          continue;
         }
       }
       // if the current move will push past max_width
       if (currentWidth + moves[i].length > maxWidth && i !== 0) {
         // don't end the line with whitespace
         if (result[result.length - 1] === ' ') {
-          result.pop()
+          result.pop();
         }
 
-        result.push(newline)
-        currentWidth = 0
+        result.push(newline);
+        currentWidth = 0;
       } else if (i !== 0) {
-        result.push(' ')
-        currentWidth++
+        result.push(' ');
+        currentWidth++;
       }
-      result.push(moves[i])
-      currentWidth += moves[i].length
+      result.push(moves[i]);
+      currentWidth += moves[i].length;
     }
 
-    return result.join('')
+    return result.join('');
   }
 
   header(...args: string[]) {
     for (let i = 0; i < args.length; i += 2) {
       if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
-        this._header[args[i]] = args[i + 1]
+        this._header[args[i]] = args[i + 1];
       }
     }
-    return this._header
+    return this._header;
   }
 
   loadPgn(
@@ -1716,29 +1780,29 @@ export class Chess {
     }: { strict?: boolean; newlineChar?: string } = {}
   ) {
     function mask(str: string): string {
-      return str.replace(/\\/g, '\\')
+      return str.replace(/\\/g, '\\');
     }
 
     function parsePgnHeader(header: string): { [key: string]: string } {
-      const headerObj: Record<string, string> = {}
-      const headers = header.split(new RegExp(mask(newlineChar)))
-      let key = ''
-      let value = ''
+      const headerObj: Record<string, string> = {};
+      const headers = header.split(new RegExp(mask(newlineChar)));
+      let key = '';
+      let value = '';
 
       for (let i = 0; i < headers.length; i++) {
-        const regex = /^\s*\[\s*([A-Za-z]+)\s*"(.*)"\s*\]\s*$/
-        key = headers[i].replace(regex, '$1')
-        value = headers[i].replace(regex, '$2')
+        const regex = /^\s*\[\s*([A-Za-z]+)\s*"(.*)"\s*\]\s*$/;
+        key = headers[i].replace(regex, '$1');
+        value = headers[i].replace(regex, '$2');
         if (key.trim().length > 0) {
-          headerObj[key] = value
+          headerObj[key] = value;
         }
       }
 
-      return headerObj
+      return headerObj;
     }
 
     // strip whitespace from head/tail of PGN block
-    pgn = pgn.trim()
+    pgn = pgn.trim();
 
     /*
      * RegExp to split header. Takes advantage of the fact that header and movetext
@@ -1758,54 +1822,29 @@ export class Chess {
         '){2}|(?:\\s*' +
         mask(newlineChar) +
         ')*$)'
-    )
+    );
 
     // If no header given, begin with moves.
-    const headerRegexResults = headerRegex.exec(pgn)
+    const headerRegexResults = headerRegex.exec(pgn);
     const headerString = headerRegexResults
       ? headerRegexResults.length >= 2
         ? headerRegexResults[1]
         : ''
-      : ''
+      : '';
 
-    // Put the board in the starting position
-    this.reset()
+    this.reset();
 
     // parse PGN header
-    const headers = parsePgnHeader(headerString)
-    let fen = ''
+    const headers = parsePgnHeader(headerString);
+    let fen = '';
 
     for (const key in headers) {
       // check to see user is including fen (possibly with wrong tag case)
       if (key.toLowerCase() === 'fen') {
-        fen = headers[key]
+        fen = headers[key];
       }
 
-      this.header(key, headers[key])
-    }
-
-    /*
-     * the permissive parser should attempt to load a fen tag, even if it's the
-     * wrong case and doesn't include a corresponding [SetUp "1"] tag
-     */
-    if (!strict) {
-      if (fen) {
-        this.load(fen, true)
-      }
-    } else {
-      /*
-       * strict parser - load the starting position indicated by [Setup '1']
-       * and [FEN position]
-       */
-      if (headers['SetUp'] === '1') {
-        if (!('FEN' in headers)) {
-          throw new Error(
-            'Invalid PGN: FEN tag must be supplied with SetUp tag'
-          )
-        }
-        // second argument to load: don't clear the headers
-        this.load(headers['FEN'], true)
-      }
+      this.header(key, headers[key]);
     }
 
     /*
@@ -1828,27 +1867,27 @@ export class Chess {
            */
           return c.charCodeAt(0) < 128
             ? c.charCodeAt(0).toString(16)
-            : encodeURIComponent(c).replace(/%/g, '').toLowerCase()
+            : encodeURIComponent(c).replace(/%/g, '').toLowerCase();
         })
-        .join('')
+        .join('');
     }
 
     function fromHex(s: string): string {
       return s.length == 0
         ? ''
-        : decodeURIComponent('%' + (s.match(/.{1,2}/g) || []).join('%'))
+        : decodeURIComponent('%' + (s.match(/.{1,2}/g) || []).join('%'));
     }
 
     const encodeComment = function (s: string) {
-      s = s.replace(new RegExp(mask(newlineChar), 'g'), ' ')
-      return `{${toHex(s.slice(1, s.length - 1))}}`
-    }
+      s = s.replace(new RegExp(mask(newlineChar), 'g'), ' ');
+      return `{${toHex(s.slice(1, s.length - 1))}}`;
+    };
 
     const decodeComment = function (s: string) {
       if (s.startsWith('{') && s.endsWith('}')) {
-        return fromHex(s.slice(1, s.length - 1))
+        return fromHex(s.slice(1, s.length - 1));
       }
-    }
+    };
 
     // delete header to get the moves
     let ms = pgn
@@ -1859,56 +1898,56 @@ export class Chess {
         function (_match, bracket, semicolon) {
           return bracket !== undefined
             ? encodeComment(bracket)
-            : ' ' + encodeComment(`{${semicolon.slice(1)}}`)
+            : ' ' + encodeComment(`{${semicolon.slice(1)}}`);
         }
       )
-      .replace(new RegExp(mask(newlineChar), 'g'), ' ')
+      .replace(new RegExp(mask(newlineChar), 'g'), ' ');
 
     // delete recursive annotation variations
-    const ravRegex = /(\([^()]+\))+?/g
+    const ravRegex = /(\([^()]+\))+?/g;
     while (ravRegex.test(ms)) {
-      ms = ms.replace(ravRegex, '')
+      ms = ms.replace(ravRegex, '');
     }
 
     // delete move numbers
-    ms = ms.replace(/\d+\.(\.\.)?/g, '')
+    ms = ms.replace(/\d+\.(\.\.)?/g, '');
 
     // delete ... indicating black to move
-    ms = ms.replace(/\.\.\./g, '')
+    ms = ms.replace(/\.\.\./g, '');
 
     /* delete numeric annotation glyphs */
-    ms = ms.replace(/\$\d+/g, '')
+    ms = ms.replace(/\$\d+/g, '');
 
     // trim and get array of moves
-    let moves = ms.trim().split(new RegExp(/\s+/))
+    let moves = ms.trim().split(new RegExp(/\s+/));
 
     // delete empty entries
-    moves = moves.filter((move) => move !== '')
+    moves = moves.filter((move) => move !== '');
 
-    let result = ''
+    let result = '';
 
     for (let halfMove = 0; halfMove < moves.length; halfMove++) {
-      const comment = decodeComment(moves[halfMove])
+      const comment = decodeComment(moves[halfMove]);
       if (comment !== undefined) {
-        this._comments[this.fen()] = comment
-        continue
+        this._comments[this.fen()] = comment;
+        continue;
       }
 
-      const move = this._moveFromSan(moves[halfMove], strict)
+      const move = this._moveFromSan(moves[halfMove], strict);
 
       // invalid move
       if (move == null) {
         // was the move an end of game marker
         if (TERMINATION_MARKERS.indexOf(moves[halfMove]) > -1) {
-          result = moves[halfMove]
+          result = moves[halfMove];
         } else {
-          throw new Error(`Invalid move in PGN: ${moves[halfMove]}`)
+          throw new Error(`Invalid move in PGN: ${moves[halfMove]}`);
         }
       } else {
         // reset the end of game marker if making a valid move
-        result = ''
-        this._makeMove(move)
-        this._positionCounts[this.fen()]++
+        result = '';
+        this._makeMove(move);
+        this._positionCounts[this.fen()]++;
       }
     }
 
@@ -1919,7 +1958,7 @@ export class Chess {
      */
 
     if (result && Object.keys(this._header).length && !this._header['Result']) {
-      this.header('Result', result)
+      this.header('Result', result);
     }
   }
 
@@ -1936,70 +1975,70 @@ export class Chess {
    */
 
   private _moveToSan(move: InternalMove, moves: InternalMove[]) {
-    let output = ''
+    let output = '';
 
     if (move.flags & BITS.KSIDE_CASTLE) {
-      output = 'O-O'
+      output = 'O-O';
     } else if (move.flags & BITS.QSIDE_CASTLE) {
-      output = 'O-O-O'
+      output = 'O-O-O';
     } else {
       if (move.piece !== PAWN) {
-        const disambiguator = getDisambiguator(move, moves)
-        output += move.piece.toUpperCase() + disambiguator
+        const disambiguator = getDisambiguator(move, moves);
+        output += move.piece.toUpperCase() + disambiguator;
       }
 
       if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
         if (move.piece === PAWN) {
-          output += algebraic(move.from)[0]
+          output += algebraic(move.from)[0];
         }
-        output += 'x'
+        output += 'x';
       }
 
-      output += algebraic(move.to)
+      output += algebraic(move.to);
 
       if (move.promotion) {
-        output += '=' + move.promotion.toUpperCase()
+        output += '=' + move.promotion.toUpperCase();
       }
     }
 
-    this._makeMove(move)
+    this._makeMove(move);
     if (this.isCheck()) {
       if (this.isCheckmate()) {
-        output += '#'
+        output += '#';
       } else {
-        output += '+'
+        output += '+';
       }
     }
-    this._undoMove()
+    this._undoMove();
 
-    return output
+    return output;
   }
 
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
   private _moveFromSan(move: string, strict = false): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
-    const cleanMove = strippedSan(move)
+    const cleanMove = strippedSan(move);
 
-    let pieceType = inferPieceType(cleanMove)
-    let moves = this._moves({ legal: true, piece: pieceType })
+    let pieceType = inferPieceType(cleanMove);
+    let moves = this._moves({ legal: true, piece: pieceType });
 
     // strict parser
     for (let i = 0, len = moves.length; i < len; i++) {
       if (cleanMove === strippedSan(this._moveToSan(moves[i], moves))) {
-        return moves[i]
+        return moves[i];
       }
     }
 
     // the strict parser failed
     if (strict) {
-      return null
+      return null;
     }
 
-    let piece = undefined
-    let matches = undefined
-    let from = undefined
-    let to = undefined
-    let promotion = undefined
+    let piece = undefined;
+    let matches = undefined;
+    let from = undefined;
+    let to = undefined;
+    let promotion = undefined;
 
     /*
      * The default permissive (non-strict) parser allows the user to parse
@@ -2018,21 +2057,21 @@ export class Chess {
      * basic interpretation (which is b1c3 parsing to Nc3).
      */
 
-    let overlyDisambiguated = false
+    let overlyDisambiguated = false;
 
     matches = cleanMove.match(
       /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/
       //     piece         from              to       promotion
-    )
+    );
 
     if (matches) {
-      piece = matches[1]
-      from = matches[2] as Square
-      to = matches[3] as Square
-      promotion = matches[4]
+      piece = matches[1];
+      from = matches[2] as Square;
+      to = matches[3] as Square;
+      promotion = matches[4];
 
       if (from.length == 1) {
-        overlyDisambiguated = true
+        overlyDisambiguated = true;
       }
     } else {
       /*
@@ -2044,25 +2083,25 @@ export class Chess {
 
       matches = cleanMove.match(
         /([pnbrqkPNBRQK])?([a-h]?[1-8]?)x?-?([a-h][1-8])([qrbnQRBN])?/
-      )
+      );
 
       if (matches) {
-        piece = matches[1]
-        from = matches[2] as Square
-        to = matches[3] as Square
-        promotion = matches[4]
+        piece = matches[1];
+        from = matches[2] as Square;
+        to = matches[3] as Square;
+        promotion = matches[4];
 
         if (from.length == 1) {
-          overlyDisambiguated = true
+          overlyDisambiguated = true;
         }
       }
     }
 
-    pieceType = inferPieceType(cleanMove)
+    pieceType = inferPieceType(cleanMove);
     moves = this._moves({
       legal: true,
       piece: piece ? (piece as PieceSymbol) : pieceType,
-    })
+    });
 
     if (!to) {
       return null;
@@ -2070,102 +2109,105 @@ export class Chess {
 
     for (let i = 0, len = moves.length; i < len; i++) {
       if (!from) {
-          // if there is no from square, it could be just 'x' missing from a capture
-          if (cleanMove === strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')) {
-            return moves[i];
-          }
-      // hand-compare move properties with the results from our permissive regex
+        // if there is no from square, it could be just 'x' missing from a capture
+        if (
+          cleanMove ===
+          strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')
+        ) {
+          return moves[i];
+        }
+        // hand-compare move properties with the results from our permissive regex
       } else if (
-          (!piece || piece.toLowerCase() == moves[i].piece) &&
-          Ox88[from] == moves[i].from &&
-          Ox88[to] == moves[i].to &&
-          (!promotion || promotion.toLowerCase() == moves[i].promotion)
+        (!piece || piece.toLowerCase() == moves[i].piece) &&
+        Ox88[from] == moves[i].from &&
+        Ox88[to] == moves[i].to &&
+        (!promotion || promotion.toLowerCase() == moves[i].promotion)
       ) {
-        return moves[i]
+        return moves[i];
       } else if (overlyDisambiguated) {
         /*
          * SPECIAL CASE: we parsed a move string that may have an unneeded
          * rank/file disambiguator (e.g. Nge7).  The 'from' variable will
          */
 
-        const square = algebraic(moves[i].from)
+        const square = algebraic(moves[i].from);
         if (
           (!piece || piece.toLowerCase() == moves[i].piece) &&
           Ox88[to] == moves[i].to &&
           (from == square[0] || from == square[1]) &&
           (!promotion || promotion.toLowerCase() == moves[i].promotion)
         ) {
-          return moves[i]
+          return moves[i];
         }
       }
     }
 
-    return null
+    return null;
   }
 
   ascii() {
-    let s = '   +------------------------+\n'
+    let s = '   +------------------------+\n';
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // display the rank
       if (file(i) === 0) {
-        s += ' ' + '87654321'[rank(i)] + ' |'
+        s += ' ' + '87654321'[rank(i)] + ' |';
       }
 
       if (this._board[i]) {
-        const piece = this._board[i].type
-        const color = this._board[i].color
+        const piece = this._board[i].type;
+        const color = this._board[i].color;
         const symbol =
-          color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
-        s += ' ' + symbol + ' '
+          color === WHITE ? piece.toUpperCase() : piece.toLowerCase();
+        s += ' ' + symbol + ' ';
       } else {
-        s += ' . '
+        s += ' . ';
       }
 
       if ((i + 1) & 0x88) {
-        s += '|\n'
-        i += 8
+        s += '|\n';
+        i += 8;
       }
     }
-    s += '   +------------------------+\n'
-    s += '     a  b  c  d  e  f  g  h'
+    s += '   +------------------------+\n';
+    s += '     a  b  c  d  e  f  g  h';
 
-    return s
+    return s;
   }
 
   perft(depth: number) {
-    const moves = this._moves({ legal: false })
-    let nodes = 0
-    const color = this._turn
+    const moves = this._moves({ legal: false });
+    let nodes = 0;
+    const color = this._turn;
 
     for (let i = 0, len = moves.length; i < len; i++) {
-      this._makeMove(moves[i])
+      this._makeMove(moves[i]);
       if (!this._isKingAttacked(color)) {
         if (depth - 1 > 0) {
-          nodes += this.perft(depth - 1)
+          nodes += this.perft(depth - 1);
         } else {
-          nodes++
+          nodes++;
         }
       }
-      this._undoMove()
+      this._undoMove();
     }
 
-    return nodes
+    return nodes;
   }
 
   // pretty = external move object
   private _makePretty(uglyMove: InternalMove): Move {
-    const { color, piece, from, to, flags, captured, promotion } = uglyMove
+    const { color, piece, from, to, flags, captured, promotion } = uglyMove;
 
-    let prettyFlags = ''
+    let prettyFlags = '';
 
     for (const flag in BITS) {
       if (BITS[flag] & flags) {
-        prettyFlags += FLAGS[flag]
+        prettyFlags += FLAGS[flag];
       }
     }
 
-    const fromAlgebraic = algebraic(from)
-    const toAlgebraic = algebraic(to)
+    const fromAlgebraic = algebraic(from);
+    const toAlgebraic = algebraic(to);
 
     const move: Move = {
       color,
@@ -2177,172 +2219,170 @@ export class Chess {
       lan: fromAlgebraic + toAlgebraic,
       before: this.fen(),
       after: '',
-    }
+    };
 
     // generate the FEN for the 'after' key
-    this._makeMove(uglyMove)
-    move.after = this.fen()
-    this._undoMove()
+    this._makeMove(uglyMove);
+    move.after = this.fen();
+    this._undoMove();
 
     if (captured) {
-      move.captured = captured
+      move.captured = captured;
     }
     if (promotion) {
-      move.promotion = promotion
-      move.lan += promotion
+      move.promotion = promotion;
+      move.lan += promotion;
     }
 
-    return move
+    return move;
   }
 
   turn() {
-    return this._turn
+    return this._turn;
   }
 
   board() {
-    const output = []
-    let row = []
+    const output = [];
+    let row = [];
 
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       if (this._board[i] == null) {
-        row.push(null)
+        row.push(null);
       } else {
         row.push({
           square: algebraic(i),
           type: this._board[i].type,
           color: this._board[i].color,
-        })
+        });
       }
       if ((i + 1) & 0x88) {
-        output.push(row)
-        row = []
-        i += 8
+        output.push(row);
+        row = [];
+        i += 8;
       }
     }
 
-    return output
+    return output;
   }
 
   squareColor(square: Square) {
     if (square in Ox88) {
-      const sq = Ox88[square]
-      return (rank(sq) + file(sq)) % 2 === 0 ? 'light' : 'dark'
+      const sq = Ox88[square];
+      return (rank(sq) + file(sq)) % 2 === 0 ? 'light' : 'dark';
     }
 
-    return null
+    return null;
   }
 
-  history(): string[]
-  history({ verbose }: { verbose: true }): Move[]
-  history({ verbose }: { verbose: false }): string[]
-  history({ verbose }: { verbose: boolean }): string[] | Move[]
-  history({ verbose = false }: { verbose?: boolean } = {}) {
-    const reversedHistory = []
-    const moveHistory = []
+  history() {
+    const reversedHistory = [];
+    const moveHistory = [];
 
     while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+      reversedHistory.push(this._undoMove());
     }
 
     while (true) {
-      const move = reversedHistory.pop()
+      const move = reversedHistory.pop();
       if (!move) {
-        break
+        break;
       }
 
-      if (verbose) {
-        moveHistory.push(this._makePretty(move))
-      } else {
-        moveHistory.push(this._moveToSan(move, this._moves()))
-      }
-      this._makeMove(move)
+      moveHistory.push(this._makePretty(move));
+      this._makeMove(move);
     }
 
-    return moveHistory
+    return moveHistory;
   }
 
   private _pruneComments() {
-    const reversedHistory = []
-    const currentComments: Record<string, string> = {}
+    const reversedHistory = [];
+    const currentComments: Record<string, string> = {};
 
     const copyComment = (fen: string) => {
       if (fen in this._comments) {
-        currentComments[fen] = this._comments[fen]
+        currentComments[fen] = this._comments[fen];
       }
-    }
+    };
 
     while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+      reversedHistory.push(this._undoMove());
     }
 
-    copyComment(this.fen())
+    copyComment(this.fen());
 
     while (true) {
-      const move = reversedHistory.pop()
+      const move = reversedHistory.pop();
       if (!move) {
-        break
+        break;
       }
-      this._makeMove(move)
-      copyComment(this.fen())
+      this._makeMove(move);
+      copyComment(this.fen());
     }
-    this._comments = currentComments
+    this._comments = currentComments;
   }
 
   getComment() {
-    return this._comments[this.fen()]
+    return this._comments[this.fen()];
   }
 
   setComment(comment: string) {
-    this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']')
+    this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']');
   }
 
   deleteComment() {
-    const comment = this._comments[this.fen()]
-    delete this._comments[this.fen()]
-    return comment
+    const comment = this._comments[this.fen()];
+    delete this._comments[this.fen()];
+    return comment;
   }
 
   getComments() {
-    this._pruneComments()
+    this._pruneComments();
     return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] }
-    })
+      return { fen: fen, comment: this._comments[fen] };
+    });
   }
 
   deleteComments() {
-    this._pruneComments()
+    this._pruneComments();
     return Object.keys(this._comments).map((fen) => {
-      const comment = this._comments[fen]
-      delete this._comments[fen]
-      return { fen: fen, comment: comment }
-    })
+      const comment = this._comments[fen];
+      delete this._comments[fen];
+      return { fen: fen, comment: comment };
+    });
   }
 
-  setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>) {
+  setCastlingRights(
+    color: Color,
+    rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>
+  ) {
     for (const side of [KING, QUEEN] as const) {
       if (rights[side] !== undefined) {
         if (rights[side]) {
-          this._castling[color] |= SIDES[side]
+          this._castling[color] |= SIDES[side];
         } else {
-          this._castling[color] &= ~SIDES[side]
+          this._castling[color] &= ~SIDES[side];
         }
       }
     }
 
-    this._updateCastlingRights()
-    const result = this.getCastlingRights(color)
+    this._updateCastlingRights();
+    const result = this.getCastlingRights(color);
 
-    return (rights[KING] === undefined || rights[KING] === result[KING]) && (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
+    return (
+      (rights[KING] === undefined || rights[KING] === result[KING]) &&
+      (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
+    );
   }
 
   getCastlingRights(color: Color) {
     return {
       [KING]: (this._castling[color] & SIDES[KING]) !== 0,
       [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
-    }
+    };
   }
 
   moveNumber() {
-    return this._moveNumber
+    return this._moveNumber;
   }
 }
