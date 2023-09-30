@@ -247,7 +247,7 @@ const RANK_8 = 0
 
 const SIDES = {
   [KING]: BITS.KSIDE_CASTLE,
-  [QUEEN]: BITS.QSIDE_CASTLE
+  [QUEEN]: BITS.QSIDE_CASTLE,
 }
 
 const ROOKS = {
@@ -781,11 +781,14 @@ export class Chess {
       this._updateEnPassantSquare()
       this._updateSetup(this.fen())
       return true
-    } 
+    }
     return false
   }
 
-  private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+  private _put(
+    { type, color }: { type: PieceSymbol; color: Color },
+    square: Square
+  ) {
     // check for piece
     if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
       return false
@@ -837,28 +840,48 @@ export class Chess {
   }
 
   _updateCastlingRights() {
-    const whiteKingInPlace = (this._board[Ox88.e1]?.type === KING && this._board[Ox88.e1]?.color === WHITE)
-    const blackKingInPlace = (this._board[Ox88.e8]?.type === KING && this._board[Ox88.e8]?.color === BLACK)
+    const whiteKingInPlace =
+      this._board[Ox88.e1]?.type === KING &&
+      this._board[Ox88.e1]?.color === WHITE
+    const blackKingInPlace =
+      this._board[Ox88.e8]?.type === KING &&
+      this._board[Ox88.e8]?.color === BLACK
 
-    if (!whiteKingInPlace || this._board[Ox88.a1]?.type !== ROOK || this._board[Ox88.a1]?.color !== WHITE) {
+    if (
+      !whiteKingInPlace ||
+      this._board[Ox88.a1]?.type !== ROOK ||
+      this._board[Ox88.a1]?.color !== WHITE
+    ) {
       this._castling.w &= ~BITS.QSIDE_CASTLE
     }
 
-    if (!whiteKingInPlace || this._board[Ox88.h1]?.type !== ROOK || this._board[Ox88.h1]?.color !== WHITE) {
+    if (
+      !whiteKingInPlace ||
+      this._board[Ox88.h1]?.type !== ROOK ||
+      this._board[Ox88.h1]?.color !== WHITE
+    ) {
       this._castling.w &= ~BITS.KSIDE_CASTLE
     }
 
-    if (!blackKingInPlace || this._board[Ox88.a8]?.type !== ROOK || this._board[Ox88.a8]?.color !== BLACK) {
+    if (
+      !blackKingInPlace ||
+      this._board[Ox88.a8]?.type !== ROOK ||
+      this._board[Ox88.a8]?.color !== BLACK
+    ) {
       this._castling.b &= ~BITS.QSIDE_CASTLE
     }
 
-    if (!blackKingInPlace || this._board[Ox88.h8]?.type !== ROOK || this._board[Ox88.h8]?.color !== BLACK) {
+    if (
+      !blackKingInPlace ||
+      this._board[Ox88.h8]?.type !== ROOK ||
+      this._board[Ox88.h8]?.color !== BLACK
+    ) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
     }
   }
 
   _updateEnPassantSquare() {
-    if(this._epSquare === EMPTY) {
+    if (this._epSquare === EMPTY) {
       return
     }
 
@@ -879,9 +902,9 @@ export class Chess {
     const canCapture = (square: number) =>
       !(square & 0x88) &&
       this._board[square]?.color === this._turn &&
-      this._board[square]?.type === PAWN;
+      this._board[square]?.type === PAWN
 
-    if(!attackers.some(canCapture)) {
+    if (!attackers.some(canCapture)) {
       this._epSquare = EMPTY
     }
   }
@@ -1486,7 +1509,7 @@ export class Chess {
       const prettyMove = this._makePretty(move)
       this._positionCounts[prettyMove.after]--
       return prettyMove
-    }    
+    }
     return null
   }
 
@@ -1743,73 +1766,8 @@ export class Chess {
     // strip whitespace from head/tail of PGN block
     pgn = pgn.trim()
 
-    /*
-     * RegExp to split header. Takes advantage of the fact that header and movetext
-     * will always have a blank line between them (ie, two newline_char's). Handles
-     * case where movetext is empty by matching newlineChar until end of string is
-     * matched - effectively trimming from the end extra newlineChar.
-     *
-     * With default newline_char, will equal:
-     * /^(\[((?:\r?\n)|.)*\])((?:\s*\r?\n){2}|(?:\s*\r?\n)*$)/
-     */
-    const headerRegex = new RegExp(
-      '^(\\[((?:' +
-        mask(newlineChar) +
-        ')|.)*\\])' +
-        '((?:\\s*' +
-        mask(newlineChar) +
-        '){2}|(?:\\s*' +
-        mask(newlineChar) +
-        ')*$)'
-    )
-
-    // If no header given, begin with moves.
-    const headerRegexResults = headerRegex.exec(pgn)
-    const headerString = headerRegexResults
-      ? headerRegexResults.length >= 2
-        ? headerRegexResults[1]
-        : ''
-      : ''
-
     // Put the board in the starting position
     this.reset()
-
-    // parse PGN header
-    const headers = parsePgnHeader(headerString)
-    let fen = ''
-
-    for (const key in headers) {
-      // check to see user is including fen (possibly with wrong tag case)
-      if (key.toLowerCase() === 'fen') {
-        fen = headers[key]
-      }
-
-      this.header(key, headers[key])
-    }
-
-    /*
-     * the permissive parser should attempt to load a fen tag, even if it's the
-     * wrong case and doesn't include a corresponding [SetUp "1"] tag
-     */
-    if (!strict) {
-      if (fen) {
-        this.load(fen, true)
-      }
-    } else {
-      /*
-       * strict parser - load the starting position indicated by [Setup '1']
-       * and [FEN position]
-       */
-      if (headers['SetUp'] === '1') {
-        if (!('FEN' in headers)) {
-          throw new Error(
-            'Invalid PGN: FEN tag must be supplied with SetUp tag'
-          )
-        }
-        // second argument to load: don't clear the headers
-        this.load(headers['FEN'], true)
-      }
-    }
 
     /*
      * NB: the regexes below that delete move numbers, recursive annotations,
@@ -1855,7 +1813,6 @@ export class Chess {
 
     // delete header to get the moves
     let ms = pgn
-      .replace(headerString, '')
       .replace(
         // encode comments so they don't get deleted below
         new RegExp(`({[^}]*})+?|;([^${mask(newlineChar)}]*)`, 'g'),
@@ -2068,21 +2025,24 @@ export class Chess {
     })
 
     if (!to) {
-      return null;
+      return null
     }
 
     for (let i = 0, len = moves.length; i < len; i++) {
       if (!from) {
-          // if there is no from square, it could be just 'x' missing from a capture
-          if (cleanMove === strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')) {
-            return moves[i];
-          }
-      // hand-compare move properties with the results from our permissive regex
+        // if there is no from square, it could be just 'x' missing from a capture
+        if (
+          cleanMove ===
+          strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')
+        ) {
+          return moves[i]
+        }
+        // hand-compare move properties with the results from our permissive regex
       } else if (
-          (!piece || piece.toLowerCase() == moves[i].piece) &&
-          Ox88[from] == moves[i].from &&
-          Ox88[to] == moves[i].to &&
-          (!promotion || promotion.toLowerCase() == moves[i].promotion)
+        (!piece || piece.toLowerCase() == moves[i].piece) &&
+        Ox88[from] == moves[i].from &&
+        Ox88[to] == moves[i].to &&
+        (!promotion || promotion.toLowerCase() == moves[i].promotion)
       ) {
         return moves[i]
       } else if (overlyDisambiguated) {
@@ -2321,7 +2281,10 @@ export class Chess {
     })
   }
 
-  setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>) {
+  setCastlingRights(
+    color: Color,
+    rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>
+  ) {
     for (const side of [KING, QUEEN] as const) {
       if (rights[side] !== undefined) {
         if (rights[side]) {
@@ -2335,7 +2298,10 @@ export class Chess {
     this._updateCastlingRights()
     const result = this.getCastlingRights(color)
 
-    return (rights[KING] === undefined || rights[KING] === result[KING]) && (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
+    return (
+      (rights[KING] === undefined || rights[KING] === result[KING]) &&
+      (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
+    )
   }
 
   getCastlingRights(color: Color) {
