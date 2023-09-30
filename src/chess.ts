@@ -540,10 +540,6 @@ export class Chess {
     }
   }
 
-  reset() {
-    this.load(DEFAULT_POSITION)
-  }
-
   get(square: Square) {
     return this._board[Ox88[square]] || false
   }
@@ -1331,9 +1327,6 @@ export class Chess {
 
     // strip whitespace from head/tail of PGN block
     pgn = pgn.trim()
-
-    // Put the board in the starting position
-    this.reset()
 
     /*
      * NB: the regexes below that delete move numbers, recursive annotations,
