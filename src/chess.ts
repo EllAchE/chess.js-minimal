@@ -85,10 +85,10 @@ export type Move = {
   captured?: PieceSymbol;
   promotion?: PieceSymbol;
   flags: string;
-  san: string;
-  lan: string;
-  before: string;
-  after: string;
+  // san: string;
+  // lan: string;
+  // before: string;
+  // after: string;
 };
 
 const EMPTY = -1;
@@ -1371,6 +1371,7 @@ export class Chess {
   }
 
   private _makeMove(move: InternalMove) {
+    // console.log('calling make move');
     const us = this._turn;
     const them = swapColor(us);
     this._push(move);
@@ -1783,24 +1784,24 @@ export class Chess {
       piece,
       from: fromAlgebraic,
       to: toAlgebraic,
-      san: this._moveToSan(uglyMove, this._moves({ legal: true })),
+      // san: this._moveToSan(uglyMove, this._moves({ legal: true })),
       flags: prettyFlags,
-      lan: fromAlgebraic + toAlgebraic,
-      before: this.fen(),
-      after: '',
+      // lan: fromAlgebraic + toAlgebraic,
+      // before: this.fen(),
+      // after: '',
     };
 
-    // generate the FEN for the 'after' key
-    this._makeMove(uglyMove);
-    move.after = this.fen();
-    this._undoMove();
+    // // generate the FEN for the 'after' key
+    // this._makeMove(uglyMove);
+    // move.after = this.fen();
+    // this._undoMove();
 
     if (captured) {
       move.captured = captured;
     }
     if (promotion) {
       move.promotion = promotion;
-      move.lan += promotion;
+      // move.lan += promotion;
     }
 
     return move;
@@ -1843,33 +1844,51 @@ export class Chess {
     return null;
   }
 
-  history(): string[];
-  history({ verbose }: { verbose: true }): Move[];
-  history({ verbose }: { verbose: false }): string[];
-  history({ verbose }: { verbose: boolean }): string[] | Move[];
-  history({ verbose = false }: { verbose?: boolean } = {}) {
-    const reversedHistory = [];
+  // original history
+  // history() {
+  //   const reversedHistory = [];
+  //   const moveHistory = [];
+
+  //   // console.log(this._history);
+
+  //   while (this._history.length > 0) {
+  //     reversedHistory.push(this._undoMove());
+  //   }
+
+  //   let move = reversedHistory.pop();
+
+  //   while (move) {
+  //     // console.log(move);
+  //     moveHistory.push(this._makePretty(move));
+  //     // console.log('after move');
+  //     this._makeMove(move);
+
+  //     move = reversedHistory.pop();
+  //   }
+
+  //   return moveHistory;
+  // }
+
+  history() {
     const moveHistory = [];
 
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove());
+    const oldMoveHistory = this._history.map((h) => h.move);
+
+    let move = oldMoveHistory.pop();
+
+    while (move) {
+      // console.log(move);
+      moveHistory.push(this._makePretty(move));
+      // console.log('after move');
+      // this._makeMove(move);
+
+      move = oldMoveHistory.pop();
     }
 
-    while (true) {
-      const move = reversedHistory.pop();
-      if (!move) {
-        break;
-      }
+    // console.log(moveHistory);
 
-      if (verbose) {
-        moveHistory.push(this._makePretty(move));
-      } else {
-        moveHistory.push(this._moveToSan(move, this._moves()));
-      }
-      this._makeMove(move);
-    }
-
-    return moveHistory;
+    return moveHistory.reverse();
+    // return moveHistory;
   }
 
   setCastlingRights(
