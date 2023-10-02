@@ -539,7 +539,6 @@ export class Chess {
   private _halfMoves = 0;
   private _moveNumber = 0;
   private _history: History[] = [];
-  private _comments: Record<string, string> = {};
   private _castling: Record<Color, number> = { w: 0, b: 0 };
 
   constructor(fen = DEFAULT_POSITION) {
@@ -555,7 +554,6 @@ export class Chess {
     this._halfMoves = 0;
     this._moveNumber = 1;
     this._history = [];
-    this._comments = {};
     this._header = keepHeaders ? this._header : {};
     this._updateSetup(this.fen());
   }
@@ -1542,36 +1540,6 @@ export class Chess {
     // Put the board in the starting position
     this.reset();
 
-    function toHex(s: string): string {
-      return Array.from(s)
-        .map(function (c) {
-          /*
-           * encodeURI doesn't transform most ASCII characters, so we handle
-           * these ourselves
-           */
-          return c.charCodeAt(0) < 128
-            ? c.charCodeAt(0).toString(16)
-            : encodeURIComponent(c).replace(/%/g, '').toLowerCase();
-        })
-        .join('');
-    }
-
-    function fromHex(s: string): string {
-      return s.length == 0
-        ? ''
-        : decodeURIComponent('%' + (s.match(/.{1,2}/g) || []).join('%'));
-    }
-
-    const encodeComment = function (s: string) {
-      return `{${toHex(s.slice(1, s.length - 1))}}`;
-    };
-
-    const decodeComment = function (s: string) {
-      if (s.startsWith('{') && s.endsWith('}')) {
-        return fromHex(s.slice(1, s.length - 1));
-      }
-    };
-
     // We don't mind destructive deletion of the comments
     let ms = pgnMoveLine.replace(new RegExp(`({[^}]*})+?`, 'g'), '');
 
@@ -1586,7 +1554,7 @@ export class Chess {
 
     // trim and get array of moves
     // let moves = ms.trim().split(new RegExp(/\s+/));
-    let moves = ms.trim().split(new RegExp(' '));
+    let moves = ms.trim().split(' ');
 
     // delete empty entries
     moves = moves.filter((move) => move !== '');
@@ -1594,12 +1562,6 @@ export class Chess {
     let result = '';
 
     for (let halfMove = 0; halfMove < moves.length; halfMove++) {
-      const comment = decodeComment(moves[halfMove]);
-      if (comment !== undefined) {
-        this._comments[this.fen()] = comment;
-        continue;
-      }
-
       const move = this._moveFromSan(moves[halfMove], strict);
 
       // invalid move
@@ -1671,7 +1633,7 @@ export class Chess {
   }
 
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
-  private _moveFromSan(move: string, strict = false): InternalMove | null {
+  private _moveFromSan(move: string, strict = true): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
     const cleanMove = strippedSan(move);
 
