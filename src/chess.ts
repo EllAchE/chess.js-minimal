@@ -1467,15 +1467,6 @@ export class Chess {
     this._turn = them;
   }
 
-  undo() {
-    const move = this._undoMove();
-    if (move) {
-      const prettyMove = this._makePretty(move);
-      return prettyMove;
-    }
-    return null;
-  }
-
   private _undoMove() {
     const old = this._history.pop();
     if (old === undefined) {
@@ -1649,121 +1640,6 @@ export class Chess {
     }
 
     return null;
-
-    // // we do not have a forgiving parser
-    // if (strict) {
-    //   return null;
-    // }
-
-    // let piece = undefined;
-    // let matches = undefined;
-    // let from = undefined;
-    // let to = undefined;
-    // let promotion = undefined;
-
-    // /*
-    //  * The default permissive (non-strict) parser allows the user to parse
-    //  * non-standard chess notations. This parser is only run after the strict
-    //  * Standard Algebraic Notation (SAN) parser has failed.
-    //  *
-    //  * When running the permissive parser, we'll run a regex to grab the piece, the
-    //  * to/from square, and an optional promotion piece. This regex will
-    //  * parse common non-standard notation like: Pe2-e4, Rc1c4, Qf3xf7,
-    //  * f7f8q, b1c3
-    //  *
-    //  * NOTE: Some positions and moves may be ambiguous when using the permissive
-    //  * parser. For example, in this position: 6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1,
-    //  * the move b1c3 may be interpreted as Nc3 or B1c3 (a disambiguated bishop
-    //  * move). In these cases, the permissive parser will default to the most
-    //  * basic interpretation (which is b1c3 parsing to Nc3).
-    //  */
-
-    // let overlyDisambiguated = false;
-
-    // matches = cleanMove.match(
-    //   /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/
-    //   //     piece         from              to       promotion
-    // );
-
-    // if (matches) {
-    //   piece = matches[1];
-    //   from = matches[2] as Square;
-    //   to = matches[3] as Square;
-    //   promotion = matches[4];
-
-    //   if (from.length == 1) {
-    //     overlyDisambiguated = true;
-    //   }
-    // } else {
-    //   /*
-    //    * The [a-h]?[1-8]? portion of the regex below handles moves that may be
-    //    * overly disambiguated (e.g. Nge7 is unnecessary and non-standard when
-    //    * there is one legal knight move to e7). In this case, the value of
-    //    * 'from' variable will be a rank or file, not a square.
-    //    */
-
-    //   matches = cleanMove.match(
-    //     /([pnbrqkPNBRQK])?([a-h]?[1-8]?)x?-?([a-h][1-8])([qrbnQRBN])?/
-    //   );
-
-    //   if (matches) {
-    //     piece = matches[1];
-    //     from = matches[2] as Square;
-    //     to = matches[3] as Square;
-    //     promotion = matches[4];
-
-    //     if (from.length == 1) {
-    //       overlyDisambiguated = true;
-    //     }
-    //   }
-    // }
-
-    // pieceType = inferPieceType(cleanMove);
-    // moves = this._moves({
-    //   legal: true,
-    //   piece: piece ? (piece as PieceSymbol) : pieceType,
-    // });
-
-    // if (!to) {
-    //   return null;
-    // }
-
-    // for (let i = 0, len = moves.length; i < len; i++) {
-    //   if (!from) {
-    //     // if there is no from square, it could be just 'x' missing from a capture
-    //     if (
-    //       cleanMove ===
-    //       strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')
-    //     ) {
-    //       return moves[i];
-    //     }
-    //     // hand-compare move properties with the results from our permissive regex
-    //   } else if (
-    //     (!piece || piece.toLowerCase() == moves[i].piece) &&
-    //     Ox88[from] == moves[i].from &&
-    //     Ox88[to] == moves[i].to &&
-    //     (!promotion || promotion.toLowerCase() == moves[i].promotion)
-    //   ) {
-    //     return moves[i];
-    //   } else if (overlyDisambiguated) {
-    //     /*
-    //      * SPECIAL CASE: we parsed a move string that may have an unneeded
-    //      * rank/file disambiguator (e.g. Nge7).  The 'from' variable will
-    //      */
-
-    //     const square = algebraic(moves[i].from);
-    //     if (
-    //       (!piece || piece.toLowerCase() == moves[i].piece) &&
-    //       Ox88[to] == moves[i].to &&
-    //       (from == square[0] || from == square[1]) &&
-    //       (!promotion || promotion.toLowerCase() == moves[i].promotion)
-    //     ) {
-    //       return moves[i];
-    //     }
-    //   }
-    // }
-
-    // return null;
   }
 
   // pretty = external move object
@@ -1787,25 +1663,15 @@ export class Chess {
       color,
       from: fromAlgebraic,
       to: toAlgebraic,
-      // san: this._moveToSan(uglyMove, this._moves({ legal: true })),
       flags: prettyFlags,
       piece,
-      // lan: fromAlgebraic + toAlgebraic,
-      // before: this.fen(),
-      // after: '',
     };
-
-    // // generate the FEN for the 'after' key
-    // this._makeMove(uglyMove);
-    // move.after = this.fen();
-    // this._undoMove();
 
     if (captured) {
       move.captured = captured;
     }
     if (promotion) {
       move.promotion = promotion;
-      // move.lan += promotion;
     }
 
     return {
@@ -1822,30 +1688,6 @@ export class Chess {
     return this._turn;
   }
 
-  board() {
-    const output = [];
-    let row = [];
-
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      if (this._board[i] == null) {
-        row.push(null);
-      } else {
-        row.push({
-          square: algebraic(i),
-          type: this._board[i].type,
-          color: this._board[i].color,
-        });
-      }
-      if ((i + 1) & 0x88) {
-        output.push(row);
-        row = [];
-        i += 8;
-      }
-    }
-
-    return output;
-  }
-
   squareColor(square: Square) {
     if (square in Ox88) {
       const sq = Ox88[square];
@@ -1855,84 +1697,9 @@ export class Chess {
     return null;
   }
 
-  // original history
-  // history() {
-  //   const reversedHistory = [];
-  //   const moveHistory = [];
-
-  //   // console.log(this._history);
-
-  //   while (this._history.length > 0) {
-  //     reversedHistory.push(this._undoMove());
-  //   }
-
-  //   let move = reversedHistory.pop();
-
-  //   while (move) {
-  //     // console.log(move);
-  //     moveHistory.push(this._makePretty(move));
-  //     // console.log('after move');
-  //     this._makeMove(move);
-
-  //     move = reversedHistory.pop();
-  //   }
-
-  //   return moveHistory;
-  // }
-
-  // we will not reverse the history, we don't mind destructive actions if better
-  // TODO: we can stream by popping
   history() {
-    // const moveHistory = [];
-
     const oldMoveHistory = this._history.map((h) => h.move);
 
     return oldMoveHistory.map((move) => this._makePretty(move));
-
-    // let move = oldMoveHistory.pop();
-
-    // while (move) {
-    //   // console.log(move);
-    //   moveHistory.push(this._makePretty(move));
-    //   // console.log('after move');
-    //   // this._makeMove(move);
-
-    //   move = oldMoveHistory.pop();
-    // }
-
-    // // console.log(moveHistory);
-
-    // return moveHistory.reverse();
-    // return moveHistory;
-  }
-
-  setCastlingRights(
-    color: Color,
-    rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>
-  ) {
-    for (const side of [KING, QUEEN] as const) {
-      if (rights[side] !== undefined) {
-        if (rights[side]) {
-          this._castling[color] |= SIDES[side];
-        } else {
-          this._castling[color] &= ~SIDES[side];
-        }
-      }
-    }
-
-    this._updateCastlingRights();
-    const result = this.getCastlingRights(color);
-
-    return (
-      (rights[KING] === undefined || rights[KING] === result[KING]) &&
-      (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
-    );
-  }
-
-  getCastlingRights(color: Color) {
-    return {
-      [KING]: (this._castling[color] & SIDES[KING]) !== 0,
-      [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
-    };
   }
 }
