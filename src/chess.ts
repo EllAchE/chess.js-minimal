@@ -85,10 +85,6 @@ export type Move = {
   captured?: PieceSymbol;
   promotion?: PieceSymbol;
   flags: string;
-  // san: string;
-  // lan: string;
-  // before: string;
-  // after: string;
 };
 
 const EMPTY = -1;
@@ -236,19 +232,9 @@ const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN];
 
 const RANK_1 = 7;
 const RANK_2 = 6;
-/*
- * const RANK_3 = 5
- * const RANK_4 = 4
- * const RANK_5 = 3
- * const RANK_6 = 2
- */
+
 const RANK_7 = 1;
 const RANK_8 = 0;
-
-const SIDES = {
-  [KING]: BITS.KSIDE_CASTLE,
-  [QUEEN]: BITS.QSIDE_CASTLE,
-};
 
 const ROOKS = {
   w: [
@@ -556,12 +542,6 @@ export class Chess {
     this._history = [];
     this._header = keepHeaders ? this._header : {};
     this._updateSetup(this.fen());
-  }
-
-  removeHeader(key: string) {
-    if (key in this._header) {
-      delete this._header[key];
-    }
   }
 
   load(fen: string, keepHeaders = false) {
@@ -1035,76 +1015,6 @@ export class Chess {
     return this.isCheckmate() || this.isStalemate() || this.isDraw();
   }
 
-  moves(): string[];
-  moves({ square }: { square: Square }): string[];
-  moves({ piece }: { piece: PieceSymbol }): string[];
-
-  moves({ square, piece }: { square: Square; piece: PieceSymbol }): string[];
-
-  moves({ verbose, square }: { verbose: true; square?: Square }): Move[];
-  moves({ verbose, square }: { verbose: false; square?: Square }): string[];
-  moves({
-    verbose,
-    square,
-  }: {
-    verbose?: boolean;
-    square?: Square;
-  }): string[] | Move[];
-
-  moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[];
-  moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[];
-  moves({
-    verbose,
-    piece,
-  }: {
-    verbose?: boolean;
-    piece?: PieceSymbol;
-  }): string[] | Move[];
-
-  moves({
-    verbose,
-    square,
-    piece,
-  }: {
-    verbose: true;
-    square?: Square;
-    piece?: PieceSymbol;
-  }): Move[];
-  moves({
-    verbose,
-    square,
-    piece,
-  }: {
-    verbose: false;
-    square?: Square;
-    piece?: PieceSymbol;
-  }): string[];
-  moves({
-    verbose,
-    square,
-    piece,
-  }: {
-    verbose?: boolean;
-    square?: Square;
-    piece?: PieceSymbol;
-  }): string[] | Move[];
-
-  moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[];
-
-  moves({
-    verbose = false,
-    square = undefined,
-    piece = undefined,
-  }: { verbose?: boolean; square?: Square; piece?: PieceSymbol } = {}) {
-    const moves = this._moves({ square, piece });
-
-    if (verbose) {
-      return moves.map((move) => this._makePretty(move));
-    } else {
-      return moves.map((move) => this._moveToSan(move, moves));
-    }
-  }
-
   _moves({
     legal = true,
     piece = undefined,
@@ -1301,63 +1211,6 @@ export class Chess {
     return legalMoves;
   }
 
-  move(
-    move: string | { from: string; to: string; promotion?: string },
-    { strict = false }: { strict?: boolean } = {}
-  ) {
-    /*
-     * The move function can be called with in the following parameters:
-     *
-     * .move('Nxb7')       <- argument is a case-sensitive SAN string
-     *
-     * .move({ from: 'h7', <- argument is a move object
-     *         to :'h8',
-     *         promotion: 'q' })
-     *
-     *
-     * An optional strict argument may be supplied to tell chess.js to
-     * strictly follow the SAN specification.
-     */
-
-    let moveObj = null;
-
-    if (typeof move === 'string') {
-      moveObj = this._moveFromSan(move, strict);
-    } else if (typeof move === 'object') {
-      const moves = this._moves();
-
-      // convert the pretty move object to an ugly move object
-      for (let i = 0, len = moves.length; i < len; i++) {
-        if (
-          move.from === algebraic(moves[i].from) &&
-          move.to === algebraic(moves[i].to) &&
-          (!('promotion' in moves[i]) || move.promotion === moves[i].promotion)
-        ) {
-          moveObj = moves[i];
-          break;
-        }
-      }
-    }
-
-    // failed to find move
-    if (!moveObj) {
-      if (typeof move === 'string') {
-        throw new Error(`Invalid move: ${move}`);
-      } else {
-        throw new Error(`Invalid move: ${JSON.stringify(move)}`);
-      }
-    }
-
-    /*
-     * need to make a copy of move because we can't generate SAN after the move
-     * is made
-     */
-    const prettyMove = this._makePretty(moveObj);
-
-    this._makeMove(moveObj);
-    return prettyMove;
-  }
-
   _push(move: InternalMove) {
     this._history.push({
       move,
@@ -1522,13 +1375,7 @@ export class Chess {
     return move;
   }
 
-  loadPgn(
-    pgnMoveLine: string,
-    {
-      strict = false,
-      newlineChar = '\r?\n',
-    }: { strict?: boolean; newlineChar?: string } = {}
-  ) {
+  loadPgn(pgnMoveLine: string) {
     // Put the board in the starting position
     this.reset();
 
@@ -1554,7 +1401,7 @@ export class Chess {
     let result = '';
 
     for (let halfMove = 0; halfMove < moves.length; halfMove++) {
-      const move = this._moveFromSan(moves[halfMove], strict);
+      const move = this._moveFromSan(moves[halfMove]);
 
       // invalid move
       if (move == null) {
@@ -1625,7 +1472,7 @@ export class Chess {
   }
 
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
-  private _moveFromSan(move: string, strict = true): InternalMove | null {
+  private _moveFromSan(move: string): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
     const cleanMove = strippedSan(move);
 
