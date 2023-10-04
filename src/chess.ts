@@ -1779,13 +1779,15 @@ export class Chess {
     const fromAlgebraic = algebraic(from);
     const toAlgebraic = algebraic(to);
 
+    // this can be redone later, but for consistent order I am constructing the move funnily
+
     const move: Move = {
       color,
-      piece,
       from: fromAlgebraic,
       to: toAlgebraic,
       // san: this._moveToSan(uglyMove, this._moves({ legal: true })),
       flags: prettyFlags,
+      piece,
       // lan: fromAlgebraic + toAlgebraic,
       // before: this.fen(),
       // after: '',
@@ -1804,7 +1806,14 @@ export class Chess {
       // move.lan += promotion;
     }
 
-    return move;
+    return {
+      color: move.color,
+      captured: move.captured,
+      from: move.from,
+      to: move.to,
+      flags: move.flags,
+      piece: move.piece,
+    };
   }
 
   turn() {
